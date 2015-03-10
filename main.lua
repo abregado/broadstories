@@ -13,7 +13,7 @@ dude = require('dude')
 
 local font = lg.newFont()
 
-local map = grid.newGridArea(lg.getWidth(),lg.getHeight(),64)
+local map = grid.newGridArea(lg.getWidth()-100,lg.getHeight()-100,32,50,50)
 local control = pimp.new(map)
 
 --[[
@@ -50,11 +50,16 @@ functionality phase 3
 
 ]]
 local px,py = 1,1
+local collected = nil
 
 function love.load()
     gs.registerEvents()
     gs.switch(game)
     pimp.addUnit(control,grid.findTileAtPos(map,3,3))
+    pimp.addUnit(control,grid.findTileAtPos(map,4,3))
+    pimp.addUnit(control,grid.findTileAtPos(map,5,3))
+    pimp.addUnit(control,grid.findTileAtPos(map,6,3))
+    pimp.addUnit(control,grid.findTileAtPos(map,7,3))
 end
 
 function love.quit()
@@ -67,19 +72,31 @@ function love.update(dt)
 end
 
 function love.mousepressed(x,y,button)
-    --[[local tile = grid.findTileAtCoord(map,x,y)
-    if tile and tile.obj == nil then
-        tile.obj = {color={255,0,0}}
-    elseif tile then
-        tile.obj=nil
+    
+    local tile = grid.findTileAtCoord(map,x,y)
+    if tile and collected then
+        if tile.obj == nil then
+            collected:arrive(tile,map)
+            collected = nil
+        end
+    elseif tile and tile.obj and not collected then
+        collected = tile.obj
+        tile.obj = nil
     end
-    print("mouse clicked")]]
+    
+    print("mouse clicked")
 end
 
 function love.draw()
+    local mx,my = lm.getPosition()
     lg.setFont(font)
     map:draw()
     map:drawObjects()
+    if collected then
+        collected:draw(mx,my,true)
+        local ox,oy = grid.getCenter(map,collected.cell)
+        lg.line(mx,my,ox,oy)
+    end
     tut.draw()
 end
 

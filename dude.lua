@@ -6,7 +6,7 @@ function d.new()
     o = {}
     o.map = nil
     o.cell = nil
-    o.color = {0,255,0}
+    o.color = {math.random(0,255),math.random(0,255),math.random(0,255)}
     o.isDead = false
     o.draw = d.draw
     o.arrive = d.arrive
@@ -18,20 +18,17 @@ end
 function d.arrive(self,cell,map)
     self.cell = cell
     self.map = map
+    cell.obj = self
 end
 
 function d.draw(self,x,y)
     --x and y parameters are optional. omitting them will draw the object at its exact location
+    local px,py = self.map:getCenter(self.cell)
     local r = (self.map.ts/2.5)
     local offset = (self.map.ts/2)
-    if x and y then
-    else
-        x,y = self.cell.x+offset,self.cell.y+offset
-    end
     
     lg.setColor(self.color)
-    lg.circle("fill",x,y,r,20)
-    print("dude drawn")
+    lg.circle("fill",x or px,y or py,r,20)
 end
 
 return d

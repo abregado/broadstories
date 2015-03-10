@@ -4,11 +4,11 @@ local vl = require('hump-master/vector-light')
 
 local g = {}
 
-function g.newGridArea(width,height,tilesize)
+function g.newGridArea(width,height,tilesize,ox,oy)
     o = {}
     o.tilelist = {}
     o.tileset = {}
-    o.x, o.y = 0,0
+    o.x, o.y = ox or 0,oy or 0
     o.ts = tilesize
     o.tw = math.floor(width/tilesize)
     o.th = math.floor(height/tilesize)
@@ -16,6 +16,7 @@ function g.newGridArea(width,height,tilesize)
     o.h = o.ts*o.th
     g.generateTiles(o,o.tw,o.th,o.ts)
     o.draw = g.draw
+    o.getCenter = g.getCenter
     o.drawObjects = g.drawObjects
     return o
 end
@@ -34,6 +35,7 @@ function g.generateTiles(o,w,h,ts)
         end
     end
 end
+
 
 function g.draw(self)
     for i,v in ipairs(self.tilelist) do
@@ -65,12 +67,18 @@ function g.findTileAtCoord(self,x,y)
         --no nothing
         print("out of bounds")
     else
+        x = x-self.x
+        y = y-self.y
         for i,v in ipairs(self.tilelist) do
-            local dist = vl.dist(v.x+(self.ts/2),v.y+(self.ts/2),x,y)
+            local dist = vl.dist((v.pos.x+0.5)*self.ts,(v.pos.y+0.5)*self.ts,x,y)
             if dist<result.d then result = {c=v,d=dist} end
         end
     end
     return result.c
+end
+
+function g.getCenter(self,tile)
+    return ((tile.pos.x+0.5)*self.ts)+self.x, ((tile.pos.y+0.5)*self.ts)+self.y
 end
 
 function g.stepDistance(self,c1,c2)
