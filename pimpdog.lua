@@ -5,8 +5,7 @@ function pd.new(map)
     o.map = map
     o.units = {}
     
-    o.addUnit = d.addUnit
-    o.update = d.update
+    o.update = pd.update
     
     return o
 end
@@ -16,11 +15,13 @@ function pd.addUnit(self,cell)
     if grid.placeObject(self.map,cell,newDude) then
         table.insert(self.units,newDude)
         newDude:arrive(cell,self.map)
+        newDude:update()
         print("new dude added")
     else
         print("failed to add new dude: location blocked")
     end
 end
+
 
 function pd.moveUnit(self,unit,cell)
     local prevCell = unit.cell

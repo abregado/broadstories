@@ -2,6 +2,9 @@
 local lg = love.graphics
 local vl = require('hump-master/vector-light')
 
+local cellColor = {101,153,51}
+local gridColor = {37,76,0}
+
 local g = {}
 
 function g.newGridArea(width,height,tilesize,ox,oy)
@@ -82,8 +85,10 @@ end
 
 function g.draw(self)
     for i,v in ipairs(self.tilelist) do
-        lg.setColor(255,255,255)
         local x,y = g.getOrigin(self,v)
+        lg.setColor(cellColor)
+        lg.rectangle("fill",x,y,self.ts,self.ts)
+        lg.setColor(gridColor)
         lg.rectangle("line",x,y,self.ts,self.ts)
     end
     lg.setColor(0,255,0)
@@ -296,7 +301,7 @@ function g.newCross(r)
 end
 
 function g.newStar(r)
-    result = g.newCross(r)
+    result = {}
     for x=-r,r do
         for y=-r,r do
             if x == y or -x == y or x==-y then

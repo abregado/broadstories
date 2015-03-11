@@ -11,6 +11,25 @@ vl= require('hump-master/vector-light')
 grid = require('grid')
 pimp = require('pimpdog')
 dude = require('dude')
+a8 = require('anim8')
+
+
+img = {}
+img.fighter = lg.newImage('/assets/pdn4.png')
+img.beastmaster = lg.newImage('/assets/smr4.png')
+img.warlock = lg.newImage('/assets/npc5.png')
+img.ranger = lg.newImage('/assets/ftr3.png')
+img.demon = lg.newImage('/assets/dvl1.png')
+img.mage = lg.newImage('/assets/amg2.png')
+img.hellknight = lg.newImage('/assets/npc3.png')
+img.goatlord = lg.newImage('/assets/npc6.png')
+
+sheet = {}
+sheet.sample = a8.newGrid(32,32,img.fighter:getWidth(),img.fighter:getHeight())
+
+anims = {}
+anims.stand = a8.newAnimation(sheet.sample(3,1),1)
+anims.walk = a8.newAnimation(sheet.sample('3-4',1),0.3)
 
 local font = lg.newFont()
 
@@ -30,14 +49,19 @@ local collected = nil
 local shape = grid.newShapeFromGrid({{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1}})
 
 function love.load()
+    lg.setDefaultFilter('nearest','nearest')
     gs.registerEvents()
     gs.switch(game)
     pimp.addUnit(control,grid.findTileAtPos(map,3,1))
     pimp.addUnit(control,grid.findTileAtPos(map,4,1))
     pimp.addUnit(control,grid.findTileAtPos(map,5,1))
     pimp.addUnit(control,grid.findTileAtPos(map,6,1))
-    pimp.addUnit(control,grid.findTileAtPos(map,7,1))
+    dude.setClassRanger(control.units[1])
+    dude.setClassMage(control.units[2])
+    dude.setClassBeastmaster(control.units[3])
     print("shape length: "..#shape)
+    
+    control:update()
 end
 
 function love.quit()
@@ -46,7 +70,8 @@ end
 
 function love.update(dt)
     tut.update(dt)
-    
+    anims.stand:update(dt)
+    anims.walk:update(dt)
 end
 
 function love.mousepressed(x,y,button)
@@ -64,6 +89,12 @@ function love.mousepressed(x,y,button)
 end
 
 function love.draw()
+    local scale = 1.5
+    local step = 0
+    for i,v in pairs(img) do
+        anims.walk:draw(v,0,step*scale*32,0,scale,scale)
+        step = step + 1
+    end
     local mx,my = lm.getPosition()
     lg.setFont(font)
     map:draw()
@@ -77,24 +108,24 @@ function love.draw()
             local x,y = grid.getOrigin(map,v)
             lg.rectangle("fill",x,y,map.ts,map.ts)
         end
+        local hoverCell = grid.findTileAtCoord(map,mx,my)
+        if hoverCell then
+            local attackArea = grid.displaceList(map,collected.attackShape,hoverCell.pos.x,hoverCell.pos.y)
+            for i,v in ipairs(attackArea) do
+                    lg.setColor(255,0,0,60)
+                    local x,y = grid.getOrigin(map,v)
+                    lg.rectangle("fill",x,y,map.ts,map.ts)
+            end
+        end
     end
     
-    local hoverCell = grid.findTileAtCoord(map,mx,my)
-    if hoverCell then
-        local attackArea = grid.displaceList(map,shape,hoverCell.pos.x,hoverCell.pos.y)
-        for i,v in ipairs(attackArea) do
-                lg.setColor(255,0,0,60)
-                local x,y = grid.getOrigin(map,v)
-                lg.rectangle("fill",x,y,map.ts,map.ts)
-        end
-    else
-        print("no hovercell found")
-    end
+    
     tut.draw()
 end
 
 function love.keypressed(key)
-    love.event.quit()
+    if key == "escape" then love.event.quit() 
+    elseif key == " " then control:update() end
 end
 
 function love.graphics.ellipse(mode, x, y, a, b, phi, points)
