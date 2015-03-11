@@ -124,6 +124,20 @@ function g.findInRadius(self,c1,d)
     return result
 end
 
+function g.findInRing(self,c1,d1,d2)
+    local result = {}
+    if d1 > d2 then 
+        d1,d2 = d2,d1
+    end
+    for i,v in ipairs(self.tilelist) do
+        local dist = vl.dist(v.pos.x,v.pos.y,c1.pos.x,c1.pos.y)
+        if dist <= d2 and dist >= d1 then
+            table.insert(result,v)
+        end
+    end
+    return result
+end
+
 function g.checkCellInList(cell,list)
     local result = false
     for i,v in ipairs(list) do
@@ -131,6 +145,66 @@ function g.checkCellInList(cell,list)
             result = true
         end
     end
+    return result
+end
+
+function g.findAllAtX(self,x)
+    local result = {}
+    for i,v in ipairs(self.tilelist) do
+        if v.pos.x == x then
+            table.insert(result,v)
+        end
+    end
+    return result
+end
+
+function g.findAllAtY(self,y)
+    local result = {}
+    for i,v in ipairs(self.tilelist) do
+        if v.pos.y == y then
+            table.insert(result,v)
+        end
+    end
+    return result
+end
+
+function g.findIntersection(list1,list2)
+    local result = {}
+    for i,v in ipairs(list1) do
+        for j,k in ipairs(list2) do
+            if v == k then
+                table.insert(result,v)
+            end
+        end
+    end
+    return result
+end
+
+function g.joinLists(list1,list2)
+    local result = {}
+    for i,v in ipairs(list1) do
+        table.insert(result,v)
+    end
+    
+    for i,v in ipairs(list2) do
+        table.insert(result,v)
+    end
+    
+    --remove duplicates
+    -- make unique keys
+    local hash = {}
+    for _,v in ipairs(result) do
+        hash[v] = true
+    end
+
+    -- transform keys back into values
+    local res = {}
+    for k,_ in pairs(hash) do
+        res[#res+1] = k
+    end
+
+    result = res
+    
     return result
 end
 
