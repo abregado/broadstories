@@ -13,9 +13,35 @@ end
 
 function pd.addUnit(self,cell)
     local newDude = dude.new()
-    newDude:arrive(cell,self.map)
-    table.insert(self.units,newDude)
-    cell.obj = newDude
+    if grid.placeObject(self.map,cell,newDude) then
+        table.insert(self.units,newDude)
+        newDude:arrive(cell,self.map)
+        print("new dude added")
+    else
+        print("failed to add new dude: location blocked")
+    end
+end
+
+function pd.moveUnit(self,unit,cell)
+    local prevCell = unit.cell
+    if pd.takeUnit(self,unit.cell) then
+        pd.placeUnit(self.map,cell,unit)
+        return prevCell
+    end
+    return nil
+end
+
+function pd.takeUnit(self,cell)
+    local obj = grid.takeObject(map,cell)
+    return obj
+end
+
+function pd.placeUnit(self,cell,unit)
+    if grid.placeObject(self.map,cell,unit) then
+        unit:arrive(cell,self.map)
+        return true
+    end
+    return false
 end
 
 function pd.update(self,dt)

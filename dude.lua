@@ -23,7 +23,6 @@ end
 function d.arrive(self,cell,map)
     self.cell = cell
     self.map = map
-    cell.obj = self
     --self.moves = grid.findInRadius(map,cell,self.speed)
     --self.moves = grid.findInRing(map,cell,self.speed,self.minspeed)
     --self.moves = grid.findAllAtY(map,self.cell.pos.y)

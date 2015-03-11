@@ -1,4 +1,5 @@
-DEBUG_MODE = false
+DEBUG_MODE = true
+if DEBUG_MODE then require ('lovedebug') end
 gs = require('hump-master/gamestate') 
 
 lg = love.graphics
@@ -13,22 +14,20 @@ dude = require('dude')
 
 local font = lg.newFont()
 
-local map = grid.newGrid(10,10,64,100,100)
+local map = grid.newGrid(20,20,math.floor(lg:getHeight()/20),(lg:getWidth()-lg:getHeight())/2,0)
 local control = pimp.new(map)
 
 --[[
 #############TODOS###############
-
-edge placement issue? 
-    Either search function, draw or too many cells are being made
-
-Setter functions for grid. Objects cant be placed directly into the grid
 
 unit manager take and place
 
 ]]
 local px,py = 1,1
 local collected = nil
+
+--local shape = grid.newStar(5)
+local shape = grid.newShapeFromGrid({{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1}})
 
 function love.load()
     gs.registerEvents()
@@ -38,6 +37,7 @@ function love.load()
     pimp.addUnit(control,grid.findTileAtPos(map,5,1))
     pimp.addUnit(control,grid.findTileAtPos(map,6,1))
     pimp.addUnit(control,grid.findTileAtPos(map,7,1))
+    print("shape length: "..#shape)
 end
 
 function love.quit()
@@ -54,15 +54,13 @@ function love.mousepressed(x,y,button)
     local tile = grid.findTileAtCoord(map,x,y)
     if tile and collected then
         if tile.obj == nil and grid.checkCellInList(tile,collected.moves) then
-            collected:arrive(tile,map)
+            pimp.placeUnit(control,tile,collected)
             collected = nil
         end
     elseif tile and tile.obj and not collected then
-        collected = tile.obj
-        tile.obj = nil
+        collected = pimp.takeUnit(control,tile)
     end
     
-    print("mouse clicked")
 end
 
 function love.draw()
@@ -80,11 +78,23 @@ function love.draw()
             lg.rectangle("fill",x,y,map.ts,map.ts)
         end
     end
+    
+    local hoverCell = grid.findTileAtCoord(map,mx,my)
+    if hoverCell then
+        local attackArea = grid.displaceList(map,shape,hoverCell.pos.x,hoverCell.pos.y)
+        for i,v in ipairs(attackArea) do
+                lg.setColor(255,0,0,60)
+                local x,y = grid.getOrigin(map,v)
+                lg.rectangle("fill",x,y,map.ts,map.ts)
+        end
+    else
+        print("no hovercell found")
+    end
     tut.draw()
 end
 
 function love.keypressed(key)
-
+    love.event.quit()
 end
 
 function love.graphics.ellipse(mode, x, y, a, b, phi, points)

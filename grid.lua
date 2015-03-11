@@ -1,4 +1,4 @@
-require ('lovedebug')
+
 local lg = love.graphics
 local vl = require('hump-master/vector-light')
 
@@ -22,7 +22,7 @@ function g.newGridArea(width,height,tilesize,ox,oy)
 end
 
 function g.newGrid(width,height,tilesize,ox,oy)
-    o = {}
+    local o = {}
     o.tilelist = {}
     o.tileset = {}
     o.x, o.y = ox or 0,oy or 0
@@ -38,15 +38,41 @@ function g.newGrid(width,height,tilesize,ox,oy)
     return o
 end
 
+function g.placeObject(map,cell,obj)
+    if cell.obj == nil then
+        cell.obj = obj
+        return true
+    else
+        return false
+    end
+end
+
+function g.takeObject(map,cell)
+    if cell.obj == nil then
+        return nil
+    else
+        local obj = cell.obj
+        cell.obj = nil
+        return obj
+    end
+end
+
 function g.setDrawLocation(self,x,y)
     self.x, self.y = x,y
+end
+
+function g.newCell(x,y)
+    local o = {}
+    o.pos = {x=x,y=y}
+    o.obj = nil
+    return o
 end
 
 function g.generateTiles(o,w,h,ts)
     for x=0,w-1 do
         o.tileset[x] = {}
         for y=0,h-1 do
-            local newCell = {pos={x=x,y=y},obj=nil}
+            local newCell = g.newCell(x,y)
             table.insert(o.tilelist,newCell)
             o.tileset[x][y] = newCell
         end
@@ -85,7 +111,7 @@ function g.findTileAtCoord(self,x,y)
     local result = {c=nil,d=9999}
     if (x > self.x+self.w) or (x < self.x) or (y > self.y+self.h) or (y < self.y) then
         --no nothing
-        print("out of bounds")
+        --print("out of bounds")
     else
         x = x-self.x
         y = y-self.y
@@ -190,7 +216,7 @@ function g.joinLists(list1,list2)
         table.insert(result,v)
     end
     
-    --remove duplicates
+    --remove duplicates THANKS SOURCEFORGE
     -- make unique keys
     local hash = {}
     for _,v in ipairs(result) do
@@ -205,6 +231,95 @@ function g.joinLists(list1,list2)
 
     result = res
     
+    return result
+end
+
+function g.displaceList(self,list,x,y)
+    local result = {}
+    for i,v in ipairs(list) do
+        local newCell = g.findTileAtPos(self,v.pos.x+x,v.pos.y+y)
+        if newCell then table.insert(result,newCell) end
+    end
+    return result
+end
+
+function g.newBox(r)
+    local result = {}
+    for x=-r,r do
+        for y=-r,r do
+            local newCell = g.newCell(x,y)
+            table.insert(result,newCell)
+        end
+    end
+    return result
+end
+
+function g.newCircle(r)
+    local box = g.newBox(r+1)
+    local result = {}
+    for i,v in ipairs(box) do
+        local d = vl.dist(v.pos.x,v.pos.y,0,0)
+        if d <= r then
+            table.insert(result,v)
+        end
+    end
+    return result
+end
+
+function g.newRing(r1,r2)
+    local result = {}
+    if r1 > r2 then 
+        r1,r2 = r2,r1
+    end
+    
+    local box = g.newBox(r2+1)
+    for i,v in ipairs(box) do
+        local d = vl.dist(v.pos.x,v.pos.y,0,0)
+        if d <= r2 and d>=r1 then
+            table.insert(result,v)
+        end
+    end
+    return result
+end
+
+function g.newCross(r)
+    result = {}
+    for x=-r,r do
+        local newCell = g.newCell(x,0)
+        table.insert(result, newCell)
+    end
+    for y=-r,r do
+        local newCell = g.newCell(0,y)
+        table.insert(result, newCell)
+    end
+    return result
+end
+
+function g.newStar(r)
+    result = g.newCross(r)
+    for x=-r,r do
+        for y=-r,r do
+            if x == y or -x == y or x==-y then
+                local newCell = g.newCell(x,y)
+                table.insert(result,newCell)
+            end
+        end
+    end
+    return result
+end
+
+function g.newShapeFromGrid(grid)
+    --grid must be 2d array of 1's and 0's
+    local result = {}
+    local offset = math.floor(#grid[1]/2)
+    for x,j in ipairs(grid) do
+        for y,k in ipairs(j) do
+            if k == 1 then
+                local newCell = g.newCell(x-offset-1,y-offset-1)
+                table.insert(result,newCell)
+            end
+        end
+    end
     return result
 end
 
