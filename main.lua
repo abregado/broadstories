@@ -33,7 +33,7 @@ anims.walk = a8.newAnimation(sheet.sample('3-4',1),0.3)
 
 local font = lg.newFont()
 
-local map = grid.newGrid(20,20,math.floor(lg:getHeight()/20),(lg:getWidth()-lg:getHeight())/2,0)
+local map = grid.newGridArea(lg:getWidth(),lg:getHeight(),32,0,0)
 local control = pimp.new(map)
 
 --[[
@@ -89,12 +89,13 @@ function love.mousepressed(x,y,button)
 end
 
 function love.draw()
-    local scale = 1.5
+    local hoverCell = nill
+    --[[local scale = 1.5
     local step = 0
     for i,v in pairs(img) do
         anims.walk:draw(v,0,step*scale*32,0,scale,scale)
         step = step + 1
-    end
+    end]]
     local mx,my = lm.getPosition()
     lg.setFont(font)
     map:draw()
@@ -108,7 +109,7 @@ function love.draw()
             local x,y = grid.getOrigin(map,v)
             lg.rectangle("fill",x,y,map.ts,map.ts)
         end
-        local hoverCell = grid.findTileAtCoord(map,mx,my)
+        hoverCell = grid.findTileAtCoord(map,mx,my)
         if hoverCell then
             local attackArea = grid.displaceList(map,collected.attackShape,hoverCell.pos.x,hoverCell.pos.y)
             for i,v in ipairs(attackArea) do
@@ -117,7 +118,28 @@ function love.draw()
                     lg.rectangle("fill",x,y,map.ts,map.ts)
             end
         end
+    else
+        hoverCell = grid.findTileAtCoord(map,mx,my)
+        
+        if hoverCell.obj then
+            local ox,oy = grid.getCenter(map,hoverCell.obj.cell)
+            lg.line(mx,my,ox,oy)
+            for i,v in ipairs(hoverCell.obj.moves) do
+                lg.setColor(0,0,255,60)
+                local x,y = grid.getOrigin(map,v)
+                lg.rectangle("fill",x,y,map.ts,map.ts)
+            end
+        
+            local attackArea = grid.displaceList(map,hoverCell.obj.attackShape,hoverCell.pos.x,hoverCell.pos.y)
+            for i,v in ipairs(attackArea) do
+                    lg.setColor(255,0,0,60)
+                    local x,y = grid.getOrigin(map,v)
+                    lg.rectangle("fill",x,y,map.ts,map.ts)
+            end
+        end
     end
+    
+    
     
     
     tut.draw()

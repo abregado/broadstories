@@ -40,7 +40,7 @@ function d.setClassRanger(o)
 end
 
 function d.setClassMage(o)
-    o.moveShape = grid.newCircle(2)
+    o.moveShape = grid.joinLists(grid.newCircle(1),grid.newRing(10,11))
     o.attackShape = grid.newCross(10)
     o.class = "Mage"
     o.img = img.mage
@@ -49,7 +49,7 @@ function d.setClassMage(o)
 end
 
 function d.setClassBeastmaster(o)
-    o.moveShape = grid.newCircle(3)
+    o.moveShape = grid.joinLists(grid.newCircle(2),grid.newCross(3))
     local bmgrid = {
         {0,0,0,0,1,0,0},
         {0,0,0,0,1,0,0},
@@ -90,17 +90,18 @@ function d.draw(self,x,y)
     local px,py = self.map:getCenter(self.cell)
     local r = (self.map.ts/2.5)
     local offset = (self.map.ts/2)
-    local aoff = self.img:getHeight()/2*1.5
     
     lg.setColor(self.color)
     lg.circle("fill",x or px,y or py,r,20)
     lg.setColor(0,0,0)
     lg.circle("line",x or px,y or py,r,20)
     lg.setColor(255,255,255)
+    local scale = self.map.ts/self.img:getHeight()
+    local aoff = self.img:getHeight()/2*scale
     if self.moved then
-        anims.stand:draw(self.img,x or px-aoff,y or py-(aoff*1.6),0,1.5,1.5)
+        anims.stand:draw(self.img,x or px-aoff,y or py-(aoff*1.6),0,scale,scale)
     else
-        anims.walk:draw(self.img,x or px-aoff,y or py-(aoff*1.6),0,1.5,1.5)
+        anims.walk:draw(self.img,x or px-aoff,y or py-(aoff*1.6),0,scale,scale)
     end
 end
 
