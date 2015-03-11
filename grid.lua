@@ -21,15 +21,32 @@ function g.newGridArea(width,height,tilesize,ox,oy)
     return o
 end
 
+function g.newGrid(width,height,tilesize,ox,oy)
+    o = {}
+    o.tilelist = {}
+    o.tileset = {}
+    o.x, o.y = ox or 0,oy or 0
+    o.ts = tilesize
+    o.tw = width
+    o.th = height
+    o.w = o.ts*o.tw
+    o.h = o.ts*o.th
+    g.generateTiles(o,o.tw,o.th,o.ts)
+    o.draw = g.draw
+    o.getCenter = g.getCenter
+    o.drawObjects = g.drawObjects
+    return o
+end
+
 function g.setDrawLocation(self,x,y)
     self.x, self.y = x,y
 end
 
 function g.generateTiles(o,w,h,ts)
-    for x=1,w do
+    for x=0,w-1 do
         o.tileset[x] = {}
-        for y=1,h do
-            local newCell = {x=(x-1)*ts,y=(y-1)*ts,pos={x=x,y=y},obj=nil}
+        for y=0,h-1 do
+            local newCell = {pos={x=x,y=y},obj=nil}
             table.insert(o.tilelist,newCell)
             o.tileset[x][y] = newCell
         end
@@ -40,8 +57,11 @@ end
 function g.draw(self)
     for i,v in ipairs(self.tilelist) do
         lg.setColor(255,255,255)
-        lg.rectangle("line",v.x+self.x,v.y+self.y,self.ts,self.ts)
+        local x,y = g.getOrigin(self,v)
+        lg.rectangle("line",x,y,self.ts,self.ts)
     end
+    lg.setColor(0,255,0)
+    lg.rectangle("line",self.x,self.y,self.w,self.h)
 end
 
 function g.drawObjects(self)
@@ -81,6 +101,10 @@ function g.getCenter(self,tile)
     return ((tile.pos.x+0.5)*self.ts)+self.x, ((tile.pos.y+0.5)*self.ts)+self.y
 end
 
+function g.getOrigin(self,tile)
+    return (tile.pos.x*self.ts)+self.x, (tile.pos.y*self.ts)+self.y
+end
+
 function g.stepDistance(self,c1,c2)
     return vl.dist(c1.pos.x,c1.pos.y,c2.pos.x,c2.pos.y)
 end
@@ -89,5 +113,25 @@ function g.pixelDistance(self,c1,c2)
     return vl.dist(c1.x,c1.y,c2.x,c2.y)
 end
 
+function g.findInRadius(self,c1,d)
+    local result = {}
+    for i,v in ipairs(self.tilelist) do
+        local dist = vl.dist(v.pos.x,v.pos.y,c1.pos.x,c1.pos.y)
+        if dist <= d then
+            table.insert(result,v)
+        end
+    end
+    return result
+end
+
+function g.checkCellInList(cell,list)
+    local result = false
+    for i,v in ipairs(list) do
+        if v == cell then
+            result = true
+        end
+    end
+    return result
+end
 
 return g

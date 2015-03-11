@@ -8,8 +8,12 @@ function d.new()
     o.cell = nil
     o.color = {math.random(0,255),math.random(0,255),math.random(0,255)}
     o.isDead = false
+    o.speed = math.random(1,4)
+    o.moves = {}
+    
     o.draw = d.draw
     o.arrive = d.arrive
+    
     
     print("dude created")
     return o
@@ -19,6 +23,7 @@ function d.arrive(self,cell,map)
     self.cell = cell
     self.map = map
     cell.obj = self
+    self.moves = grid.findInRadius(map,cell,self.speed)
 end
 
 function d.draw(self,x,y)

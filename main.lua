@@ -13,40 +13,18 @@ dude = require('dude')
 
 local font = lg.newFont()
 
-local map = grid.newGridArea(lg.getWidth()-100,lg.getHeight()-100,32,50,50)
+local map = grid.newGrid(10,10,64,100,100)
 local control = pimp.new(map)
 
 --[[
 #############TODOS###############
-grid object
-  generate grid given screensize/tilesize
-  generate grid of W,H of given tilesize
-  stores display location (x,y)
-  stores own heigh and width
-  draw function to call draw of cells
-  1D and 2D array lookups (store as both, modify references)
-  get tile from X,Y input
-  tiled input
-  distance calulation
-  grid object only used for reference!!! it does not modify the cell objects at all!!!
 
-cell objects
-  draw
-  own color
-  grid parent
-  
-functionality phase 1
-  cell that mouse is on becomes highlighted
-  click and then all cells with x range become highlighted
+edge placement issue? 
+    Either search function, draw or too many cells are being made
 
-functionality phase 2
-  click a cell with contents
-  record cell
-  show ghost contents with line connecting
-  click elsewhere to move the contents to the new cell
+Setter functions for grid. Objects cant be placed directly into the grid
 
-functionality phase 3
-
+unit manager take and place
 
 ]]
 local px,py = 1,1
@@ -55,11 +33,11 @@ local collected = nil
 function love.load()
     gs.registerEvents()
     gs.switch(game)
-    pimp.addUnit(control,grid.findTileAtPos(map,3,3))
-    pimp.addUnit(control,grid.findTileAtPos(map,4,3))
-    pimp.addUnit(control,grid.findTileAtPos(map,5,3))
-    pimp.addUnit(control,grid.findTileAtPos(map,6,3))
-    pimp.addUnit(control,grid.findTileAtPos(map,7,3))
+    pimp.addUnit(control,grid.findTileAtPos(map,3,1))
+    pimp.addUnit(control,grid.findTileAtPos(map,4,1))
+    pimp.addUnit(control,grid.findTileAtPos(map,5,1))
+    pimp.addUnit(control,grid.findTileAtPos(map,6,1))
+    pimp.addUnit(control,grid.findTileAtPos(map,7,1))
 end
 
 function love.quit()
@@ -75,7 +53,7 @@ function love.mousepressed(x,y,button)
     
     local tile = grid.findTileAtCoord(map,x,y)
     if tile and collected then
-        if tile.obj == nil then
+        if tile.obj == nil and grid.checkCellInList(tile,collected.moves) then
             collected:arrive(tile,map)
             collected = nil
         end
@@ -96,28 +74,17 @@ function love.draw()
         collected:draw(mx,my,true)
         local ox,oy = grid.getCenter(map,collected.cell)
         lg.line(mx,my,ox,oy)
+        for i,v in ipairs(collected.moves) do
+            lg.setColor(0,0,255,60)
+            local x,y = grid.getOrigin(map,v)
+            lg.rectangle("fill",x,y,map.ts,map.ts)
+        end
     end
     tut.draw()
 end
 
 function love.keypressed(key)
-   --[[if key == "up" then
-        py = py -1
-    elseif key == "down" then
-        py = py +1
-    elseif key == "left" then
-        px = px -1
-    elseif key == "right" then
-        px = px +1
-    end
-    
-    local tile = grid.findTileAtPos(map,px,py)
-    if tile and tile.obj == nil then
-        tile.obj = {color={0,255,0}}
-    elseif tile then
-        tile.obj=nil
-    end
-    ]]
+
 end
 
 function love.graphics.ellipse(mode, x, y, a, b, phi, points)
