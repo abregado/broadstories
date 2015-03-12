@@ -11,7 +11,7 @@ function pd.new(map)
 end
 
 function pd.addUnit(self,cell)
-    local newDude = dude.new()
+    local newDude = dude.new(self)
     if grid.placeObject(self.map,cell,newDude) then
         table.insert(self.units,newDude)
         newDude:arrive(cell,self.map)
@@ -26,8 +26,11 @@ end
 function pd.moveUnit(self,unit,cell)
     local prevCell = unit.cell
     if pd.takeUnit(self,unit.cell) then
-        pd.placeUnit(self.map,cell,unit)
-        return prevCell
+        if pd.placeUnit(self,cell,unit) then
+            return prevCell
+        else
+            pd.placeUnit(self,prevCell,unit)
+        end
     end
     return nil
 end
@@ -48,11 +51,28 @@ function pd.placeUnit(self,cell,unit)
 end
 
 function pd.update(self,dt)
+    
+    
+    pd.applyDamage(self)
+    
+    for i,v in ipairs(self.units) do
+        if v.npc then
+            --[[local target = pd.findAttackSquare(self,v)
+            if target then
+                pd.moveUnit(self,v,target)
+            end]]
+            local tcell = v:ai()
+            print(tcell)
+            if tcell then
+                pd.moveUnit(self,v,tcell)
+                print("moved AI character")
+            end
+        end
+    end
+    
     for i,v in ipairs(self.units) do
         v:update(dt)
     end
-    
-    pd.applyDamage(self)
 
     --remove dead guys
     for i,v in ipairs(self.units) do
@@ -104,5 +124,61 @@ function pd.applyDamage(self)
         end
     end
 end
+
+function pd.findFurthestEnemy(self,unit,x,y)
+    local result = nil
+    local d = 999999999999
+    for i,v in ipairs(self.units) do
+        local dist = vl.dist(x,y,v.cell.pos.x,v.cell.pos.y)
+        if dist > d and not (v == unit) and not (v.team == unit.team) then
+            d = dist
+            result = v
+        end
+    end
+    return result
+end
+
+function pd.findClosestEnemy(self,unit,x,y)
+    local result = nil
+    local d = 999999999999
+    for i,v in ipairs(self.units) do
+        local dist = vl.dist(x,y,v.cell.pos.x,v.cell.pos.y)
+        if dist < d and not (v == unit) and not (v.team == unit.team) then
+            d = dist
+            result = v
+        end
+    end
+    return result
+end
+
+function pd.findAttackSquares(self, unit)
+    --checks current move and returns list of cells where an attack will be possible
+    local moveOptions = grid.displaceList(self.map,unit.moveShape,unit.cell.pos.x,unit.cell.pos.y)
+    local options = {}
+    for i,v in ipairs(moveOptions) do
+        if v.obj == nil then
+            local attacks = 0
+            local attackShape = grid.displaceList(self.map,unit.attackShape,v.pos.x,v.pos.y)
+            for j,k in ipairs(attackShape) do
+                local enemy = k.obj
+                if enemy and not (enemy.team == unit.team) then
+                    attacks = attacks +1
+                end
+            end
+            if attacks > 0 then
+                table.insert(options,v)
+            end
+        end
+    end
+    
+    --[[local sorted = {}
+    for i,v in spairs(options,function(t,a,b) return t[b].attacks > t[a].attacks end) do
+        table.insert(sorted,v.cell)
+    end]]
+    
+    return options
+end
+
+
 
 return pd

@@ -1,4 +1,4 @@
-DEBUG_MODE = false
+DEBUG_MODE = true
 if DEBUG_MODE then require ('lovedebug') end
 gs = require('hump-master/gamestate') 
 
@@ -39,7 +39,7 @@ anims.walk = a8.newAnimation(sheet.sample('3-4',1),0.3)
 
 local font = lg.newFont()
 
-local map = grid.newGridArea(lg:getWidth()*.75,lg:getHeight()*.75,64,lg:getWidth()/8,lg:getHeight()/8)
+local map = grid.newGridArea(lg:getWidth()*.75,lg:getHeight()*.75,32,lg:getWidth()/8,lg:getHeight()/8)
 local control = pimp.new(map)
 
 --[[

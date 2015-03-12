@@ -2,10 +2,11 @@ local lg = love.graphics
 
 d = {}
 
-function d.new()
+function d.new(controller)
     local o = {}
-    o.map = nil
+    o.map = controller.map
     o.cell = nil
+    o.control = controller
     o.color = {math.random(0,255),math.random(0,255),math.random(0,255)}
     o.isDead = false
     o.moves = {}
@@ -49,7 +50,8 @@ function d.setClassDefault(o)
     o.color = {100,100,255}
     o.npc = false
     o.team = 1
-    d.update(o)
+    o.ai = function(self) return d.pickRandomAttack(self) or d.moveTowardEnemy(self) end
+
 end
 
 function d.setClassRanger(o)
@@ -60,7 +62,7 @@ function d.setClassRanger(o)
     o.color = {203,178,151}
     o.npc = false
     o.team = 1
-    d.update(o)
+
 end
 
 function d.setClassMage(o)
@@ -71,10 +73,11 @@ function d.setClassMage(o)
     o.color = {192,20,169}
     o.npc = false
     o.team = 1
-    d.update(o)
+
 end
 
 function d.setClassWarlock(o)
+    --o.moveShape = grid.joinLists(grid.newCircle(1),grid.newRing(10,11))
     o.moveShape = grid.joinLists(grid.newCircle(1),grid.newRing(10,11))
     o.attackShape = grid.newCross(8)
     o.class = "Warlock"
@@ -83,11 +86,12 @@ function d.setClassWarlock(o)
     o.npc = true
     o.moved = true
     o.team = 2
-    d.update(o)
+    o.ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
+
 end
 
 function d.setClassDemon(o)
-    o.moveShape = grid.newCircle(5)
+    o.moveShape = grid.newCircle(2)
     o.attackShape = grid.newCross(1)
     o.class = "Demon"
     o.img = img.demon
@@ -95,7 +99,7 @@ function d.setClassDemon(o)
     o.npc = true
     o.moved = true
     o.team = 2
-    d.update(o)
+
 end
 
 function d.setClassBeastmaster(o)
@@ -115,7 +119,6 @@ function d.setClassBeastmaster(o)
     o.color = {86,188,109}
     o.npc = false
     o.team = 1
-    d.update(o)
 end
 
 function d.update(self)
@@ -173,11 +176,13 @@ function d.drawStats(self)
     local offset = (self.map.ts/2)
     local scale = self.map.ts/self.img:getHeight()
     local aoff = self.img:getHeight()/2*scale
+    local hIcon = img.heart
+    if self.npc then hIcon = img.skull end
     --draw health ui
     lg.setColor(255,255,255)
-    local heartW = img.heart:getWidth()*0.25*scale
+    local heartW = hIcon:getWidth()*0.25*scale
     for i=1,self.stats.hp do
-        lg.draw(img.heart,px-(aoff/2)-(self.stats.hp*heartW/2)+(i*heartW),py - (aoff*1.6)-heartW,0,0.25*scale,0.25*scale)
+        lg.draw(hIcon,px-(aoff/2)-(self.stats.hp*heartW/2)+(i*heartW),py - (aoff*1.6)-heartW,0,0.25*scale,0.25*scale)
     end
     --draw armor ui
     lg.setColor(255,255,255)
@@ -191,6 +196,29 @@ function d.drawStats(self)
     for i=1,self.damage do
         lg.draw(img.orangeicon,px-(aoff/2)-(self.damage*iconW/2)+(i*iconW),py - (aoff*1.6)-(iconW*3),0,0.25*scale,0.25*scale)
     end
+end
+
+function d.moveTowardEnemy(self)
+    local target = pimp.findClosestEnemy(self.control,self,self.cell.pos.x,self.cell.pos.y)
+    print(target.class)
+    local options = grid.displaceList(self.map,self.moveShape,self.cell.pos.x,self.cell.pos.y)
+    options = grid.removeFullCells(options)
+    local tcell = grid.getClosestFromList(options,target.cell.pos.x,target.cell.pos.y)
+    print(tcell.pos.x,tcell.pos.y,#options)
+    
+    return tcell or nil
+end
+
+function d.pickRandomAttack(self)
+    local attackSquares = pimp.findAttackSquares(self.control,self)
+    return grid.pickRandomCell(attackSquares)
+end
+
+function d.pickFurthestAttack(self)
+    local target = pimp.findClosestEnemy(self.control,self,self.cell.pos.x,self.cell.pos.y)
+    local attackSquares = pimp.findAttackSquares(self.control,self)
+    print("furthest attack squares: "..#attackSquares)
+    return grid.getFurthestFromList(attackSquares,target.cell.pos.x,target.cell.pos.y)
 end
 
 return d

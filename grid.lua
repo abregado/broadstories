@@ -248,6 +248,56 @@ function g.displaceList(self,list,x,y)
     return result
 end
 
+function g.getFurthestFromList(list,x,y)
+    local result = nil
+    local d = -1
+    for i,v in ipairs(list) do
+        local dist = vl.dist(x,y,v.pos.x,v.pos.y)
+        if dist > d then
+            d = dist
+            result = v
+        end
+    end
+    return result
+end
+
+function g.getClosestFromList(list,x,y)
+    local result = nil
+    local d = 999999999999
+    for i,v in ipairs(list) do
+        local dist = vl.dist(x,y,v.pos.x,v.pos.y)
+        if dist < d then
+            d = dist
+            result = v
+        end
+    end
+    return result
+end
+
+function g.removeFullCells(list)
+    local result = {}
+    for i,v in ipairs(list) do
+        if v.obj == nil then
+            table.insert(result,v)
+        end
+    end
+    return result
+end
+
+function g.pickRandomCell(list)
+    if #list == 0 then
+        return nil
+    elseif #list == 1 then
+        return list[1]
+    else
+        local r = math.random(1,#list)
+        return list[r]
+    end
+    return nil
+end
+
+--##########  SHAPE GENERATOR ############--
+
 function g.newBox(r)
     local result = {}
     for x=-r,r do
