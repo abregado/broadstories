@@ -1,4 +1,4 @@
-DEBUG_MODE = true
+DEBUG_MODE = false
 if DEBUG_MODE then require ('lovedebug') end
 gs = require('hump-master/gamestate') 
 
@@ -23,6 +23,12 @@ img.demon = lg.newImage('/assets/dvl1.png')
 img.mage = lg.newImage('/assets/amg2.png')
 img.hellknight = lg.newImage('/assets/npc3.png')
 img.goatlord = lg.newImage('/assets/npc6.png')
+img.heart = lg.newImage('/assets/heart_0.png')
+img.attack = lg.newImage('/assets/attack.png')
+img.damage = lg.newImage('/assets/damage.png')
+img.skull = lg.newImage('/assets/skull.png')
+img.blueicon = lg.newImage('/assets/blueicon.png')
+img.orangeicon = lg.newImage('/assets/orangeicon.png')
 
 sheet = {}
 sheet.sample = a8.newGrid(32,32,img.fighter:getWidth(),img.fighter:getHeight())
@@ -33,13 +39,14 @@ anims.walk = a8.newAnimation(sheet.sample('3-4',1),0.3)
 
 local font = lg.newFont()
 
-local map = grid.newGridArea(lg:getWidth(),lg:getHeight(),32,0,0)
+local map = grid.newGridArea(lg:getWidth()*.75,lg:getHeight()*.75,64,lg:getWidth()/8,lg:getHeight()/8)
 local control = pimp.new(map)
 
 --[[
 #############TODOS###############
 
-unit manager take and place
+end turn damge calculation
+enemy movement destination search
 
 ]]
 local px,py = 1,1
@@ -56,9 +63,13 @@ function love.load()
     pimp.addUnit(control,grid.findTileAtPos(map,4,1))
     pimp.addUnit(control,grid.findTileAtPos(map,5,1))
     pimp.addUnit(control,grid.findTileAtPos(map,6,1))
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2),map.th-2))
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)-2,map.th-2))
     dude.setClassRanger(control.units[1])
     dude.setClassMage(control.units[2])
     dude.setClassBeastmaster(control.units[3])
+    dude.setClassWarlock(control.units[5])
+    dude.setClassDemon(control.units[6])
     print("shape length: "..#shape)
     
     control:update()
@@ -82,7 +93,7 @@ function love.mousepressed(x,y,button)
             pimp.placeUnit(control,tile,collected)
             collected = nil
         end
-    elseif tile and tile.obj and not collected then
+    elseif tile and tile.obj and not collected and not tile.obj.npc then
         collected = pimp.takeUnit(control,tile)
     end
     
@@ -105,7 +116,7 @@ function love.draw()
         local ox,oy = grid.getCenter(map,collected.cell)
         lg.line(mx,my,ox,oy)
         for i,v in ipairs(collected.moves) do
-            lg.setColor(0,0,255,60)
+            lg.setColor(0,0,255,90)
             local x,y = grid.getOrigin(map,v)
             lg.rectangle("fill",x,y,map.ts,map.ts)
         end
@@ -113,7 +124,7 @@ function love.draw()
         if hoverCell then
             local attackArea = grid.displaceList(map,collected.attackShape,hoverCell.pos.x,hoverCell.pos.y)
             for i,v in ipairs(attackArea) do
-                    lg.setColor(255,0,0,60)
+                    lg.setColor(255,0,0,30)
                     local x,y = grid.getOrigin(map,v)
                     lg.rectangle("fill",x,y,map.ts,map.ts)
             end
@@ -121,21 +132,22 @@ function love.draw()
     else
         hoverCell = grid.findTileAtCoord(map,mx,my)
         
-        if hoverCell.obj then
+        if hoverCell and hoverCell.obj then
             local ox,oy = grid.getCenter(map,hoverCell.obj.cell)
             lg.line(mx,my,ox,oy)
             for i,v in ipairs(hoverCell.obj.moves) do
-                lg.setColor(0,0,255,60)
+                lg.setColor(0,0,255,30)
                 local x,y = grid.getOrigin(map,v)
                 lg.rectangle("fill",x,y,map.ts,map.ts)
             end
         
             local attackArea = grid.displaceList(map,hoverCell.obj.attackShape,hoverCell.pos.x,hoverCell.pos.y)
             for i,v in ipairs(attackArea) do
-                    lg.setColor(255,0,0,60)
+                    lg.setColor(255,0,0,90)
                     local x,y = grid.getOrigin(map,v)
                     lg.rectangle("fill",x,y,map.ts,map.ts)
             end
+            hoverCell.obj:draw()
         end
     end
     
