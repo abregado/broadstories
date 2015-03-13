@@ -23,12 +23,21 @@ img.demon = lg.newImage('/assets/dvl1.png')
 img.mage = lg.newImage('/assets/amg2.png')
 img.hellknight = lg.newImage('/assets/npc3.png')
 img.goatlord = lg.newImage('/assets/npc6.png')
+img.thief1 = lg.newImage('/assets/thf1.png')
+img.thief2 = lg.newImage('/assets/thf2.png')
+img.thief3 = lg.newImage('/assets/thf3.png')
+img.thief4 = lg.newImage('/assets/thf4.png')
+img.boy = lg.newImage('/assets/ybo1.png')
+img.girl = lg.newImage('/assets/ygr1.png')
+
 img.heart = lg.newImage('/assets/heart_0.png')
 img.attack = lg.newImage('/assets/attack.png')
 img.damage = lg.newImage('/assets/damage.png')
 img.skull = lg.newImage('/assets/skull.png')
 img.blueicon = lg.newImage('/assets/blueicon.png')
 img.orangeicon = lg.newImage('/assets/orangeicon.png')
+img.shield = lg.newImage('/assets/icon_13.png')
+img.hit = lg.newImage('/assets/icon_82.png')
 
 sheet = {}
 sheet.sample = a8.newGrid(32,32,img.fighter:getWidth(),img.fighter:getHeight())
@@ -39,14 +48,13 @@ anims.walk = a8.newAnimation(sheet.sample('3-4',1),0.3)
 
 local font = lg.newFont()
 
-local map = grid.newGridArea(lg:getWidth()*.75,lg:getHeight()*.75,32,lg:getWidth()/8,lg:getHeight()/8)
+local map = grid.newGridArea(lg:getWidth()*.75,lg:getHeight()*.75,64,lg:getWidth()/8,lg:getHeight()/8)
 local control = pimp.new(map)
 
 --[[
 #############TODOS###############
 
-end turn damge calculation
-enemy movement destination search
+movement animations
 
 ]]
 local px,py = 1,1
@@ -59,17 +67,23 @@ function love.load()
     lg.setDefaultFilter('nearest','nearest')
     gs.registerEvents()
     gs.switch(game)
-    pimp.addUnit(control,grid.findTileAtPos(map,3,1))
-    pimp.addUnit(control,grid.findTileAtPos(map,4,1))
-    pimp.addUnit(control,grid.findTileAtPos(map,5,1))
-    pimp.addUnit(control,grid.findTileAtPos(map,6,1))
-    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2),map.th-2))
-    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)-2,map.th-2))
-    dude.setClassRanger(control.units[1])
-    dude.setClassMage(control.units[2])
-    dude.setClassBeastmaster(control.units[3])
-    dude.setClassWarlock(control.units[5])
-    dude.setClassDemon(control.units[6])
+    pimp.addUnit(control,grid.findTileAtPos(map,3,1),"Fighter")
+    pimp.addUnit(control,grid.findTileAtPos(map,4,1),"Mage")
+    pimp.addUnit(control,grid.findTileAtPos(map,5,1),"Beastmaster")
+    pimp.addUnit(control,grid.findTileAtPos(map,6,1),"Ranger")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2),map.th-2),"Thief")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)-2,map.th-2),"Thief")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)-4,map.th-2),"Thief")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)-6,map.th-2),"Thief")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)+2,map.th-2),"Thief")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)+4,map.th-2),"Thief")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2),map.th-3),"Thief")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)-2,map.th-3),"Thief")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)-4,map.th-3),"Thief")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)-6,map.th-3),"Thief")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)+2,map.th-3),"Thief")
+    pimp.addUnit(control,grid.findTileAtPos(map,math.floor(map.tw/2)+4,map.th-3),"Thief")
+
     print("shape length: "..#shape)
     
     control:update()
@@ -147,7 +161,7 @@ function love.draw()
                     local x,y = grid.getOrigin(map,v)
                     lg.rectangle("fill",x,y,map.ts,map.ts)
             end
-            hoverCell.obj:draw()
+            hoverCell.obj:draw(nil,nil,true)
         end
     end
     

@@ -10,8 +10,8 @@ function pd.new(map)
     return o
 end
 
-function pd.addUnit(self,cell)
-    local newDude = dude.new(self)
+function pd.addUnit(self,cell,class)
+    local newDude = dude.new(self,class)
     if grid.placeObject(self.map,cell,newDude) then
         table.insert(self.units,newDude)
         newDude:arrive(cell,self.map)
@@ -50,17 +50,9 @@ function pd.placeUnit(self,cell,unit)
     return false
 end
 
-function pd.update(self,dt)
-    
-    
-    pd.applyDamage(self)
-    
+function doTeamAI(self,team)
     for i,v in ipairs(self.units) do
-        if v.npc then
-            --[[local target = pd.findAttackSquare(self,v)
-            if target then
-                pd.moveUnit(self,v,target)
-            end]]
+        if v.npc and v.team == team then
             local tcell = v:ai()
             print(tcell)
             if tcell then
@@ -69,19 +61,30 @@ function pd.update(self,dt)
             end
         end
     end
-    
-    for i,v in ipairs(self.units) do
-        v:update(dt)
-    end
+end
 
+function pd.update(self,dt)
+    
+    
+    pd.applyDamage(self,1)
+    doTeamAI(self,2)
+    pd.applyDamage(self,2)
+    
+    
     --remove dead guys
     for i,v in ipairs(self.units) do
         if v.isDead then
             grid.takeObject(self.map,v.cell)
             table.remove(self.units,i)
-            print("one dude died")
+            print("one dude died") 
         end
     end
+    
+    for i,v in ipairs(self.units) do
+        v:update(dt)
+    end
+    pd.checkDamage(self)
+    
 end
 
 function pd.checkAttackers(self)
@@ -117,7 +120,13 @@ function pd.checkDamage(self)
     end
 end
 
-function pd.applyDamage(self)
+function pd.applyDamage(self,team)
+    for i,v in ipairs(self.units) do
+        if v.team == team then
+            v.damage = 0
+        end
+    end
+    
     for i,v in ipairs(self.units) do
         if v.damage >= v.stats.armor then
             v:hurt()

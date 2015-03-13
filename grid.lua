@@ -20,6 +20,7 @@ function g.newGridArea(width,height,tilesize,ox,oy)
     g.generateTiles(o,o.tw,o.th,o.ts)
     o.draw = g.draw
     o.getCenter = g.getCenter
+    o.getOrigin = g.getOrigin
     o.drawObjects = g.drawObjects
     return o
 end
@@ -277,7 +278,17 @@ end
 function g.removeFullCells(list)
     local result = {}
     for i,v in ipairs(list) do
-        if v.obj == nil then
+        if v.obj == nil or v.obj.isDead then
+            table.insert(result,v)
+        end
+    end
+    return result
+end
+
+function g.removeEnemyCells(list,unit)
+    local result = {}
+    for i,v in ipairs(list) do
+        if v.obj == nil or v.obj.team == unit.team then
             table.insert(result,v)
         end
     end
