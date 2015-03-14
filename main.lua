@@ -12,6 +12,8 @@ grid = require('grid')
 pimp = require('pimpdog')
 dude = require('dude')
 a8 = require('anim8')
+tween = require('tween')
+aa = require('attackAnim')
 
 
 img = {}
@@ -29,6 +31,7 @@ img.thief3 = lg.newImage('/assets/thf3.png')
 img.thief4 = lg.newImage('/assets/thf4.png')
 img.boy = lg.newImage('/assets/ybo1.png')
 img.girl = lg.newImage('/assets/ygr1.png')
+img.skelly = lg.newImage('/assets/skl1.png')
 
 img.heart = lg.newImage('/assets/heart_0.png')
 img.attack = lg.newImage('/assets/attack.png')
@@ -36,7 +39,7 @@ img.damage = lg.newImage('/assets/damage.png')
 img.skull = lg.newImage('/assets/skull.png')
 img.blueicon = lg.newImage('/assets/blueicon.png')
 img.orangeicon = lg.newImage('/assets/orangeicon.png')
-img.shield = lg.newImage('/assets/icon_13.png')
+img.shield = lg.newImage('/assets/icon_12.png')
 img.hit = lg.newImage('/assets/icon_82.png')
 
 sheet = {}
@@ -54,19 +57,40 @@ local control = pimp.new(map)
 --[[
 #############TODOS###############
 
-movement animations
-draw per unit, not per cell
-update unit actual X,Y per dt (move toward current cell)
-add movements to list, return true when complete
-only animate the next one in list
-add to list when placeObject is successful called
-split arrive into target and arrive
-swap pimp update to endTurn
-constantly update so that animations run.
+dt based phasing control
+
+attack animations
+    new attack animation object to get added to animRegister
+    new function which adds attack anims based on damage
+        this function must keep a list of attackers
+        collect animation data from attackers (different attack types)
+        show who is being attacked AND who is attacking
+    new function which adds damage anims based on attacks
+        floating -1 hearts
+    new function which adds death anims based on kills
+        floating skull and unit fadeout
+
+win/lose flyups
+    Move current level to new gamestate
+    master gamestate for level generation
+        stats first level
+    to/from temporary gamestates with Win/lose flyups
+    constructors for these temporary gamestates
+    reason text passed to new gamestates
+
+win/lose conditions
+    Win, all enemies defeated
+    Win, enemies cannot defeat you
+    Lose, all heros destroyed
+    Lose, heros cannot defeat enemies
+    after win/lose, return to main gamestate and get a new level
+    
 
 ]]
 local px,py = 1,1
 local collected = nil
+
+inputAccepted = true
 
 --local shape = grid.newStar(5)
 local shape = grid.newShapeFromGrid({{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1}})
@@ -94,7 +118,7 @@ function love.load()
 
     print("shape length: "..#shape)
     
-    control:update()
+    --control:endTurn()
 end
 
 function love.quit()
@@ -105,20 +129,23 @@ function love.update(dt)
     tut.update(dt)
     anims.stand:update(dt)
     anims.walk:update(dt)
+    inputAccepted = control:update(dt)
+        
+    
 end
 
 function love.mousepressed(x,y,button)
-    
-    local tile = grid.findTileAtCoord(map,x,y)
-    if tile and collected then
-        if tile.obj == nil and grid.checkCellInList(tile,collected.moves) then
-            pimp.placeUnit(control,tile,collected)
-            collected = nil
+    if inputAccepted then
+        local tile = grid.findTileAtCoord(map,x,y)
+        if tile and collected then
+            if tile.obj == nil and grid.checkCellInList(tile,collected.moves) then
+                pimp.placeUnit(control,tile,collected)
+                collected = nil
+            end
+        elseif tile and tile.obj and not collected and not tile.obj.npc then
+            collected = pimp.takeUnit(control,tile)
         end
-    elseif tile and tile.obj and not collected and not tile.obj.npc then
-        collected = pimp.takeUnit(control,tile)
     end
-    
 end
 
 function love.draw()
@@ -132,7 +159,9 @@ function love.draw()
     local mx,my = lm.getPosition()
     lg.setFont(font)
     map:draw()
-    map:drawObjects()
+    
+    control:draw()
+    --map:drawObjects()
     if collected then
         collected:draw(mx,my,true)
         local ox,oy = grid.getCenter(map,collected.cell)
@@ -173,15 +202,22 @@ function love.draw()
         end
     end
     
-    
-    
+    if not inputAccepted then
+        lg.setColor(255,0,0)
+        lg.setLineWidth(5)
+        lg.rectangle("line",map.x-1,map.y-1,map.w+2,map.h+2)
+        lg.setLineWidth(1)
+    end
     
     tut.draw()
 end
 
 function love.keypressed(key)
-    if key == "escape" then love.event.quit() 
-    elseif key == " " then control:update() end
+    if inputAccepted then
+        if key == "escape" then love.event.quit() 
+        elseif key == " " then control:endTurn() end
+        
+    end
 end
 
 function love.graphics.ellipse(mode, x, y, a, b, phi, points)

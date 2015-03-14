@@ -200,6 +200,8 @@ function g.findAllAtY(self,y)
     return result
 end
 
+
+
 function g.findIntersection(list1,list2)
     local result = {}
     for i,v in ipairs(list1) do
@@ -305,6 +307,20 @@ function g.pickRandomCell(list)
         return list[r]
     end
     return nil
+end
+
+function g.findCompliment(list1,list2)
+    local result = {}
+    for i,v in ipairs(list1) do
+        local isInList2 = false
+        for j,k in ipairs(list2) do
+            if v.pos.x == k.pos.x and v.pos.y == k.pos.y then
+                isInList2 = true
+            end
+        end
+        if not isInList2 then table.insert(result,v) end
+    end
+    return result
 end
 
 --##########  SHAPE GENERATOR ############--

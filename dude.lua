@@ -8,11 +8,14 @@ function d.new(controller,class)
     o.map = controller.map
     o.cell = nil
     o.control = controller
+    o.map = controller.map
     o.color = {math.random(0,255),math.random(0,255),math.random(0,255)}
     o.isDead = false
     o.moves = {}
     o.moved = false
     o.attacking = false
+    o.x,o.y = 0,0
+    o.moveTween = tween.new(1,o,{x=0,y=0})
     
     
     o.stats = {}
@@ -24,16 +27,50 @@ function d.new(controller,class)
     
     o.draw = d.draw
     o.arrive = d.arrive
-    o.update = d.update
+    o.endTurn = d.endTurn
+    o.updateMovement = d.updateMovement
     o.hurt = d.hurt
     o.kill = d.kill
+    o.setDest = d.setDest
     
-    print("dude created")
     return o
 end
 
+
+function d.newDeathAnim(corpse)
+    local o = {}
+    o.draw = function(self)
+        local px,py = corpse.x,corpse.y
+        lg.setColor(255,255,255,255-(self.off*2))
+        local offset = img.heart:getWidth()/2
+        lg.draw(img.heart,px-offset,py-self.off-offset)
+        
+        
+        local r = corpse.map.ts/2.5
+        local offset = (corpse.map.ts/2)
+        local scale = corpse.map.ts/img.skelly:getHeight()*0.75
+        
+        lg.setColor(0,0,0,125)
+        lg.circle("fill",x or px,y or py,r/scale,20)
+        lg.setColor(255,255,255)
+        local aoff = img.skelly:getHeight()/2*scale
+        anims.stand:draw(img.skelly,px-aoff,py-(aoff*1.8),0,scale,scale)
+
+        
+    end
+    o.off = 0
+    o.x = x
+    o.y = y
+    o.tween = tween.new(2,o,{off=128},'outQuad')
+    
+    return o
+end
+
+
 function d.hurt(self)
     self.stats.hp = self.stats.hp -1
+    local hurtAnim = aa.new({aa.newHurtAnim(self.x,self.y)})
+    self.control:addToRegister(hurtAnim)
     if self.stats.hp <= 0 then
         self:kill()
     end
@@ -41,6 +78,7 @@ end
 
 function d.kill(self)
     self.isDead = true
+    self.control:addToRegister(aa.new({d.newDeathAnim(self)}))
 end
 
 function d.setClass(o,class)
@@ -92,7 +130,7 @@ end
 
 function d.setClassRanger(o)
     o.moveShape = grid.newBox(1)
-    o.attackShape = grid.newStar(10)
+    o.attackShape = grid.findCompliment(grid.newStar(10),grid.newStar(1))
     o.class = "Ranger"
     o.img = img.ranger
     o.color = {203,178,151}
@@ -104,7 +142,7 @@ end
 
 function d.setClassMage(o)
     o.moveShape = grid.newBox(1)
-    o.attackShape = grid.newCross(10)
+    o.attackShape = grid.findCompliment(grid.newCross(10),grid.newCross(2))
     o.class = "Mage"
     o.img = img.mage
     o.color = {192,20,169}
@@ -142,7 +180,7 @@ function d.setClassDemon(o)
 end
 
 function d.setClassThief(o)
-    o.moveShape = grid.newCross(1)
+    o.moveShape = grid.newCross(2)
     o.attackShape = grid.newStar(1)
     o.class = "Thief"
     local skins = {img.thief1,img.thief2,img.thief3,img.thief4}
@@ -160,13 +198,13 @@ end
 function d.setClassBeastmaster(o)
     o.moveShape = grid.joinLists(grid.newBox(1),grid.newCross(2))
     local bmgrid = {
-        {0,0,0,0,1,0,0},
-        {0,0,0,0,1,0,0},
-        {1,1,1,0,1,0,0},
         {0,0,0,0,0,0,0},
-        {0,0,1,0,1,1,1},
-        {0,0,1,0,0,0,0},
-        {0,0,1,0,0,0,0}
+        {0,0,1,0,1,0,0},
+        {0,1,1,0,1,1,0},
+        {0,0,0,0,0,0,0},
+        {0,1,1,0,1,1,0},
+        {0,0,1,0,1,0,0},
+        {0,0,0,0,0,0,0}
         }
     o.attackShape = grid.newShapeFromGrid(bmgrid)
     o.class = "Beastmaster"
@@ -177,7 +215,8 @@ function d.setClassBeastmaster(o)
     o.stats.hp = 4
 end
 
-function d.update(self)
+function d.endTurn(self)       
+    
     if self.cell then   
         self.moves = grid.removeEnemyCells(grid.displaceList(self.map,self.moveShape,self.cell.pos.x or 0,self.cell.pos.y or 0),self)
     end
@@ -185,21 +224,36 @@ function d.update(self)
     
 end
 
-function d.arrive(self,cell,map)
+function d.updateMovement(self,dt)
+    --update actual position toward target cell
+    local complete = self.moveTween and self.moveTween:update(dt)
+    if complete then self:arrive() end
+    return complete
+end
+
+function  d.setDest(self,cell)
     self.cell = cell
-    self.map = map
+    local x,y = grid.getCenter(self.map,cell)
+    self.moveTween = tween.new(0.25,self,{x=x,y=y})
+    self.control:addToRegister(self)
+end
+
+function d.arrive(self)
     self.moved = true
-    --self.moves = grid.findInRadius(map,cell,self.speed)
-    --self.moves = grid.findInRing(map,cell,self.speed,self.minspeed)
-    --self.moves = grid.findAllAtY(map,self.cell.pos.y)
-    --self.moves = grid.joinLists(grid.findAllAtY(map,self.cell.pos.y),grid.findAllAtX(map,self.cell.pos.x))
-    --self.moves = grid.joinLists(self.moves,grid.findInRing(map,cell,self.speed,self.minspeed))
-    --self.moves = grid.displaceList(map,self.moveShape,cell.pos.x,cell.pos.y)
+end
+
+function d.setCell(self,cell)
+    --immediatley jump to cell
+    self.cell = cell
+    local x,y = grid.getCenter(self.map,cell)
+    self.x,self.y = x,y
+    self.moveTween = nil
+    
 end
 
 function d.draw(self,x,y,showStats)
     --x and y parameters are optional. omitting them will draw the object at its exact location
-    local px,py = self.map:getCenter(self.cell)
+    local px,py = self.x,self.y
     local r = self.map.ts/2.5
     local offset = (self.map.ts/2)
     local scale = self.map.ts/self.img:getHeight()*0.75
@@ -223,80 +277,75 @@ function d.draw(self,x,y,showStats)
         lg.draw(img.attack,px-aoff,py-(aoff*3.6),0,scale,scale)
     end]]
     
-    if self.damage > 0 then
-        d.drawArmor(self)
+    if self.damage > 0 and self.npc and inputAccepted then
+        d.drawHits(self)
     end
     if showStats then
         d.drawHealth(self)
+        d.drawArmor(self)
     end
-    
 end
 
-function d.drawArmor(self)
-    local px,py = self.map:getCenter(self.cell)
-    local ox,oy = self.map:getOrigin(self.cell)
+function d.drawHits(self)
+    local px,py = self.x,self.y
+    local ox,oy = self.x-(self.map.ts/2),self.y-(self.map.ts/2)
     local by = py + self.map.ts/2
-    
-    local scale = self.img:getHeight()/self.map.ts*1.5
     
     local sIcon = img.shield
     local dIcon = img.hit
-    local iw,ih = sIcon:getWidth()*scale,sIcon:getHeight()*scale
-    local two = iw*self.stats.armor/2
     
-    for i=1,self.stats.armor do
+    local idealWidth = self.map.ts/2
+    local margin = self.map.ts/6
+    local scale = idealWidth/sIcon:getWidth()
+    
+    local iw,ih = sIcon:getWidth()*scale,sIcon:getHeight()*scale
+    local two = ((margin*(self.stats.armor-1))+iw)/2
+    
+    for i=self.stats.armor,1,-1 do
         if i <= self.damage then
-            lg.draw(dIcon,px+((i-1)*iw)-two,by-ih,0,scale,scale)
+            lg.draw(dIcon,px+((i-1)*margin)-two,by-ih,0,scale,scale)
         else
-            lg.draw(sIcon,px+((i-1)*iw)-two,by-ih,0,scale,scale)
+            lg.draw(sIcon,px+((i-1)*margin)-two,by-ih,0,scale,scale)
         end
     end
 end
 
 function d.drawHealth(self)
-    local px,py = self.map:getCenter(self.cell)
-    local ox,oy = self.map:getOrigin(self.cell)
+    local px,py = self.x,self.y
+    local ox,oy = self.x-(self.map.ts/2),self.y-(self.map.ts/2)
     local by = py + self.map.ts/2
     
-    local scale = self.img:getHeight()/self.map.ts*1.5
     
     local hIcon = img.heart
+    
+    local idealWidth = self.map.ts/4
+    local scale = idealWidth/hIcon:getWidth()
+    
     local iw,ih = hIcon:getWidth()*scale,hIcon:getHeight()*scale
     local two = iw*self.stats.hp/2
     
     for i=1,self.stats.hp do
+        lg.draw(hIcon,px+((i-1)*iw)-two,by-ih-ih,0,scale,scale)
+    end
+end
+
+function d.drawArmor(self)
+    local px,py = self.x,self.y
+    local ox,oy = self.x-(self.map.ts/2),self.y-(self.map.ts/2)
+    local by = py + self.map.ts/2
+    
+    
+    local hIcon = img.shield
+    
+    local idealWidth = self.map.ts/4
+    local scale = idealWidth/hIcon:getWidth()
+    
+    local iw,ih = hIcon:getWidth()*scale,hIcon:getHeight()*scale
+    local two = iw*self.stats.armor/2
+    
+    for i=1,self.stats.armor do
         lg.draw(hIcon,px+((i-1)*iw)-two,by-ih,0,scale,scale)
     end
-    
-    --[[
-    local r = (self.map.ts/2.5)
-    local offset = (self.map.ts/2)
-    local scale = self.map.ts/self.img:getHeight()
-    local aoff = self.img:getHeight()/2*scale
-    
-    if self.npc then hIcon = img.skull end
-    --draw health ui
-    lg.setColor(255,255,255)
-    local heartW = hIcon:getWidth()*0.25*scale
-    for i=1,self.stats.hp do
-        lg.draw(hIcon,px-(aoff/2)-(self.stats.hp*heartW/2)+(i*heartW),py - (aoff*1.6)+heartW,0,0.25*scale,0.25*scale)
-    end
-    
-    --draw armor ui
-    lg.setColor(255,255,255)
-    local iconW = img.blueicon:getWidth()*0.25*scale
-    for i=1,self.stats.armor do
-        lg.draw(img.blueicon,px-(aoff/2)-(self.stats.armor*iconW/2)+(i*iconW),py - (aoff*1.6)-(iconW*2),0,0.25*scale,0.25*scale)
-    end
-    --draw damage ui
-    lg.setColor(255,255,255)
-    local iconW = img.orangeicon:getWidth()*0.25*scale
-    for i=1,self.damage do
-        lg.draw(img.orangeicon,px-(aoff/2)-(self.damage*iconW/2)+(i*iconW),py - (aoff*1.6)-(iconW*3),0,0.25*scale,0.25*scale)
-    end]]
-    
-    
-    
 end
 
 function d.moveTowardEnemy(self)
@@ -306,7 +355,7 @@ function d.moveTowardEnemy(self)
         local options = grid.displaceList(self.map,self.moveShape,self.cell.pos.x,self.cell.pos.y)
         options = grid.removeFullCells(options)
         tcell = grid.getClosestFromList(options,target.cell.pos.x,target.cell.pos.y)
-        print(tcell.pos.x,tcell.pos.y,#options)
+
         return tcell or nil
     end
     return nil
@@ -319,7 +368,7 @@ function d.avoidEnemy(self)
         local options = grid.displaceList(self.map,self.moveShape,self.cell.pos.x,self.cell.pos.y)
         options = grid.removeFullCells(options)
         tcell = grid.getFurthestFromList(options,target.cell.pos.x,target.cell.pos.y)
-        print(tcell.pos.x,tcell.pos.y,#options)
+
         return tcell or nil
     end
     return nil

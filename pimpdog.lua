@@ -5,17 +5,46 @@ function pd.new(map)
     o.map = map
     o.units = {}
     
+    o.animRegister = {}
+    
+    o.endTurn = pd.endTurn
     o.update = pd.update
+    o.draw = pd.draw
+    o.addToRegister = pd.addToRegister
     
     return o
+end
+
+function pd.addToRegister(self,unit)
+    table.insert(self.animRegister,unit)
+end
+
+function pd.draw(self)
+    
+    
+    for i,v in ipairs(self.units) do
+        v:draw()
+    end
+    
+    if self.animRegister[1] and self.animRegister[1].isAnim then
+        self.animRegister[1]:draw()
+    end
+end
+
+function pd.update(self,dt)
+    if self.animRegister[1] then
+        local complete = self.animRegister[1]:updateMovement(dt)
+        if complete then table.remove(self.animRegister,1) end
+    end
+    return #self.animRegister == 0 
 end
 
 function pd.addUnit(self,cell,class)
     local newDude = dude.new(self,class)
     if grid.placeObject(self.map,cell,newDude) then
         table.insert(self.units,newDude)
-        newDude:arrive(cell,self.map)
-        newDude:update()
+        dude.setCell(newDude,cell)
+        newDude:endTurn()
         print("new dude added")
     else
         print("failed to add new dude: location blocked")
@@ -42,7 +71,7 @@ end
 
 function pd.placeUnit(self,cell,unit)
     if grid.placeObject(self.map,cell,unit) then
-        unit:arrive(cell,self.map)
+        unit:setDest(cell)
         pd.checkAttackers(self)
         pd.checkDamage(self)
         return true
@@ -54,18 +83,15 @@ function doTeamAI(self,team)
     for i,v in ipairs(self.units) do
         if v.npc and v.team == team then
             local tcell = v:ai()
-            print(tcell)
             if tcell then
                 pd.moveUnit(self,v,tcell)
-                print("moved AI character")
             end
         end
     end
 end
 
-function pd.update(self,dt)
-    
-    
+function pd.endTurn(self,dt)
+       
     pd.applyDamage(self,1)
     doTeamAI(self,2)
     pd.applyDamage(self,2)
@@ -81,14 +107,13 @@ function pd.update(self,dt)
     end
     
     for i,v in ipairs(self.units) do
-        v:update(dt)
+        v:endTurn(dt)
     end
     pd.checkDamage(self)
-    
+
 end
 
 function pd.checkAttackers(self)
-    print("checking for attackers")
     for i,v in ipairs(self.units) do
         local attackSquares = grid.displaceList(self.map,v.attackShape,v.cell.pos.x,v.cell.pos.y)
         local result = false
@@ -103,7 +128,6 @@ function pd.checkAttackers(self)
 end
 
 function pd.checkDamage(self)
-    print("checking for damage")
     --reset damage counters
     for i,v in ipairs(self.units) do
         v.damage = 0
@@ -158,6 +182,15 @@ function pd.findClosestEnemy(self,unit,x,y)
         end
     end
     return result
+end
+
+function pd.findUnitAt(self,x,y)
+    for i,v in ipairs(self.units) do
+        if v.cell.pos.x == x and v.cell.pos.y == y then
+            return v
+        end
+    end
+    return nil
 end
 
 function pd.findAttackSquares(self, unit)
