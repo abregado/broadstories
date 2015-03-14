@@ -21,7 +21,9 @@ function d.new(controller,class)
     o.stats = {}
     o.stats.hp = 3
     o.stats.armor = 2
+    o.stats.str = 1
     o.damage = 0
+    o.attackers = {}
     
     d.setClass(o,class or nil)
     
@@ -41,9 +43,7 @@ function d.newDeathAnim(corpse)
     local o = {}
     o.draw = function(self)
         local px,py = corpse.x,corpse.y
-        lg.setColor(255,255,255,255-(self.off*2))
-        local offset = img.heart:getWidth()/2
-        lg.draw(img.heart,px-offset,py-self.off-offset)
+        
         
         
         local r = corpse.map.ts/2.5
@@ -52,9 +52,13 @@ function d.newDeathAnim(corpse)
         
         lg.setColor(0,0,0,125)
         lg.circle("fill",x or px,y or py,r/scale,20)
-        lg.setColor(255,255,255)
+        lg.setColor(255,255,255,255-(self.off*2))
         local aoff = img.skelly:getHeight()/2*scale
         anims.stand:draw(img.skelly,px-aoff,py-(aoff*1.8),0,scale,scale)
+        
+        lg.setColor(255,255,255,255-(self.off*2))
+        offset = img.skull:getWidth()/2
+        lg.draw(img.skull,px-offset,py-self.off-offset)
 
         
     end
@@ -69,16 +73,20 @@ end
 
 function d.hurt(self)
     self.stats.hp = self.stats.hp -1
-    local hurtAnim = aa.new({aa.newHurtAnim(self.x,self.y)})
-    self.control:addToRegister(hurtAnim)
+    
     if self.stats.hp <= 0 then
         self:kill()
+        return true
     end
+    
+    return false
+    
 end
 
 function d.kill(self)
     self.isDead = true
     self.control:addToRegister(aa.new({d.newDeathAnim(self)}))
+    self.img = img.skelly
 end
 
 function d.setClass(o,class)

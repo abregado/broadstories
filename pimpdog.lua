@@ -6,6 +6,7 @@ function pd.new(map)
     o.units = {}
     
     o.animRegister = {}
+    o.injuryRegister = {}
     
     o.endTurn = pd.endTurn
     o.update = pd.update
@@ -15,8 +16,12 @@ function pd.new(map)
     return o
 end
 
-function pd.addToRegister(self,unit)
-    table.insert(self.animRegister,unit)
+function pd.addToRegister(self,unit,force)
+    if force then
+        table.insert(self.animRegister,1,unit)
+    else
+        table.insert(self.animRegister,unit)
+    end
 end
 
 function pd.draw(self)
@@ -34,7 +39,15 @@ end
 function pd.update(self,dt)
     if self.animRegister[1] then
         local complete = self.animRegister[1]:updateMovement(dt)
-        if complete then table.remove(self.animRegister,1) end
+        if complete then 
+            if self.injuryRegister[1] and self.animRegister[1] == self.injuryRegister[1].anim then
+                local death = self.injuryRegister[1].victim:hurt()
+                table.remove(self.injuryRegister,1)
+                if death then complete = false end
+            end
+            table.remove(self.animRegister,1) 
+            
+        end
     end
     return #self.animRegister == 0 
 end
@@ -72,14 +85,15 @@ end
 function pd.placeUnit(self,cell,unit)
     if grid.placeObject(self.map,cell,unit) then
         unit:setDest(cell)
-        pd.checkAttackers(self)
-        pd.checkDamage(self)
+        --pd.checkAttackers(self)
+        --just for player units so the UI updates
+        if unit.team == 1 then pd.checkDamage(self) end
         return true
     end
     return false
 end
 
-function doTeamAI(self,team)
+function pd.doTeamAI(self,team)
     for i,v in ipairs(self.units) do
         if v.npc and v.team == team then
             local tcell = v:ai()
@@ -91,9 +105,9 @@ function doTeamAI(self,team)
 end
 
 function pd.endTurn(self,dt)
-       
+   --[[    
     pd.applyDamage(self,1)
-    doTeamAI(self,2)
+    pd.doTeamAI(self,2)
     pd.applyDamage(self,2)
     
     
@@ -110,7 +124,24 @@ function pd.endTurn(self,dt)
         v:endTurn(dt)
     end
     pd.checkDamage(self)
+    ]]
+end
 
+function pd.updateTeamMoves(self,team)
+    for i,v in ipairs(self.units) do
+        if v.team == team then v:endTurn(dt) end
+    end
+end
+
+function pd.cleanDead(self)
+    --remove dead guys
+    for i,v in ipairs(self.units) do
+        if v.isDead then
+            grid.takeObject(self.map,v.cell)
+            table.remove(self.units,i)
+            print("one dude died") 
+        end
+    end
 end
 
 function pd.checkAttackers(self)
@@ -141,6 +172,63 @@ function pd.checkDamage(self)
                 enemy.damage = enemy.damage + 1
             end
         end
+    end
+end
+
+function pd.calculateAttackers(self,team)
+    --reset damage counters
+    for i,v in ipairs(self.units) do
+        v.attackers = {}
+    end
+    --calculate current damage
+    for i,v in ipairs(self.units) do
+        if v.team == team then
+            local attackSquares = grid.displaceList(self.map,v.attackShape,v.cell.pos.x,v.cell.pos.y)
+            for j,k in ipairs(attackSquares) do
+                local enemy = k.obj
+                if enemy and not (enemy.team == v.team) then
+                    table.insert(enemy.attackers,v)
+                end
+            end
+        end
+    end
+    
+    local attacked={}
+    --compile list of attacked units
+    for i,v in ipairs(self.units) do
+        if #v.attackers > 0 then
+            table.insert(attacked,v)
+        end
+    end
+    return attacked
+end
+
+function pd.calculateInjured(attacked)
+    local result = {}
+    for i,unit in ipairs(attacked) do
+        local hitTotal = 0
+        for j, attacker in ipairs(unit.attackers) do
+            hitTotal = hitTotal + attacker.stats.str
+        end
+        if hitTotal >= unit.stats.armor then
+            table.insert(result,unit)
+        end
+    end
+    return result
+end
+
+function pd.addInjuryPairs(self,injured)
+    for i,victim in ipairs(injured) do
+        local anims = {}
+        for j,attacker in ipairs(victim.attackers) do
+            local newAnim = aa.newHitAnim(attacker.x,attacker.y)
+            table.insert(anims,newAnim)
+        end
+        local attackAnim = aa.new(anims)
+        local hurtAnim = aa.new({aa.newHurtAnim(victim.x,victim.y)})
+        self:addToRegister(attackAnim)
+        self:addToRegister(hurtAnim)
+        table.insert(self.injuryRegister,{victim=victim,anim=hurtAnim})
     end
 end
 

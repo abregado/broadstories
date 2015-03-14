@@ -3,6 +3,7 @@ local lg = love.graphics
 local vl = require('hump-master/vector-light')
 
 local cellColor = {101,153,51}
+local objColor = {101,190,51}
 local gridColor = {37,76,0}
 
 local g = {}
@@ -87,7 +88,11 @@ end
 function g.draw(self)
     for i,v in ipairs(self.tilelist) do
         local x,y = g.getOrigin(self,v)
-        lg.setColor(cellColor)
+        if v.obj then
+            lg.setColor(objColor)
+        else
+            lg.setColor(cellColor)
+        end
         lg.rectangle("fill",x,y,self.ts,self.ts)
         lg.setColor(gridColor)
         lg.rectangle("line",x,y,self.ts,self.ts)
