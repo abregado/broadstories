@@ -55,6 +55,14 @@ local control = pimp.new(map)
 #############TODOS###############
 
 movement animations
+draw per unit, not per cell
+update unit actual X,Y per dt (move toward current cell)
+add movements to list, return true when complete
+only animate the next one in list
+add to list when placeObject is successful called
+split arrive into target and arrive
+swap pimp update to endTurn
+constantly update so that animations run.
 
 ]]
 local px,py = 1,1
