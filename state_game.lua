@@ -8,7 +8,7 @@ inputAccepted = true
 function game.new()
     local state = {}
      
-    state.map = grid.newGridArea(lg:getWidth()*.75,lg:getHeight()*.75,64,lg:getWidth()/8,lg:getHeight()/8)
+    state.map = grid.newGridArea(lg:getWidth()*.75,lg:getHeight()*.75,32,lg:getWidth()/8,lg:getHeight()/8)
     state.control = pimp.new(state.map)
     
     state.collected = nil
@@ -33,7 +33,10 @@ function game.new()
 end
 
 function game:populate()
-    pimp.addUnit(self.control,grid.findTileAtPos(self.map,5,1),"Fighter")
+    math.randomseed(os.time())
+    local level = lgen.generate(6,self.map.tw,self.map.th,4)
+    lgen.spawn(level,self.control)
+    --[[pimp.addUnit(self.control,grid.findTileAtPos(self.map,5,1),"Fighter")
     pimp.addUnit(self.control,grid.findTileAtPos(self.map,7,0),"Mage")
     pimp.addUnit(self.control,grid.findTileAtPos(self.map,9,1),"Beastmaster")
     pimp.addUnit(self.control,grid.findTileAtPos(self.map,9,0),"Ranger")
@@ -48,7 +51,7 @@ function game:populate()
     --pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)-4,self.map.th-3),"Thief")
     --pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)-6,self.map.th-3),"Thief")
     --pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)+2,self.map.th-3),"Thief")
-    --pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)+4,self.map.th-3),"Thief")
+    --pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)+4,self.map.th-3),"Thief")]]
 end
 
 function game:mousepressed(x,y,button)
@@ -68,8 +71,8 @@ end
 function game:keypressed(key)
     if inputAccepted then
         if key == "escape" then love.event.quit() 
-        elseif key == " " then self:startNextPhase() end
-        
+        elseif key == " " then self:startNextPhase()
+        elseif key == "r" then gs.switch(game.new()) end
     end
 end
 

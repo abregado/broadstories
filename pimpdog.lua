@@ -10,6 +10,7 @@ function pd.new(map)
     
     o.endTurn = pd.endTurn
     o.update = pd.update
+    o.addUnit = pd.addUnit
     o.draw = pd.draw
     o.addToRegister = pd.addToRegister
     
@@ -58,9 +59,9 @@ function pd.addUnit(self,cell,class)
         table.insert(self.units,newDude)
         dude.setCell(newDude,cell)
         newDude:endTurn()
-        print("new dude added")
+        --print("new dude added")
     else
-        print("failed to add new dude: location blocked")
+        --print("failed to add new dude: location blocked")
     end
 end
 

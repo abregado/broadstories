@@ -7,6 +7,7 @@ lm = love.mouse
 tut = require('tutorial')
 td = tut.td
 game = require('state_game')
+lgen = require('levgen')
 vl= require('hump-master/vector-light')
 grid = require('grid')
 pimp = require('pimpdog')

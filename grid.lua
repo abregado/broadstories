@@ -23,6 +23,7 @@ function g.newGridArea(width,height,tilesize,ox,oy)
     o.getCenter = g.getCenter
     o.getOrigin = g.getOrigin
     o.drawObjects = g.drawObjects
+    --print(o.tw,o.th,"mapsize")
     return o
 end
 
@@ -40,6 +41,7 @@ function g.newGrid(width,height,tilesize,ox,oy)
     o.draw = g.draw
     o.getCenter = g.getCenter
     o.drawObjects = g.drawObjects
+    --print(o.tw,o.th,"mapsize")
     return o
 end
 

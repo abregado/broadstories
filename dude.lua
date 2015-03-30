@@ -104,6 +104,10 @@ function d.setClass(o,class)
         d.setClassDemon(o)
     elseif class == "Thief" then
         d.setClassThief(o)
+    elseif class == "ThiefArcher" then
+        d.setClassThiefArcher(o)
+    elseif class == "Tough" then
+        d.setClassTough(o)
     else
         d.setClassGenericNPC(o)
     end
@@ -184,12 +188,13 @@ function d.setClassDemon(o)
     o.npc = true
     o.moved = true
     o.team = 2
+    o.ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
 
 end
 
 function d.setClassThief(o)
     o.moveShape = grid.newCross(2)
-    o.attackShape = grid.newStar(1)
+    o.attackShape = grid.newCross(1)
     o.class = "Thief"
     local skins = {img.thief1,img.thief2,img.thief3,img.thief4}
     local skin = math.random(1,#skins)
@@ -200,6 +205,38 @@ function d.setClassThief(o)
     o.team = 2
     o.stats.hp = 2
     o.stats.armor = 2
+    o.ai = function(self) return d.pickClosestAttack(self) or d.moveTowardEnemy(self) end
+end
+
+function d.setClassThiefArcher(o)
+    o.moveShape = grid.newCross(2)
+    o.attackShape = grid.newRing(3,4)
+    o.class = "ThiefArcher"
+    local skins = {img.thief1,img.thief2,img.thief3,img.thief4}
+    local skin = math.random(1,#skins)
+    o.img = skins[skin]
+    o.color = {125,200,125}
+    o.npc = true
+    o.moved = true
+    o.team = 2
+    o.stats.hp = 2
+    o.stats.armor = 2
+    o.ai = function(self) return d.pickClosestAttack(self) or d.moveTowardEnemy(self) end
+end
+
+function d.setClassTough(o)
+    o.moveShape = grid.newCross(2)
+    o.attackShape = grid.newStar(1)
+    o.class = "Tough"
+    local skins = {img.thief1,img.thief2,img.thief3,img.thief4}
+    local skin = math.random(1,#skins)
+    o.img = skins[skin]
+    o.color = {125,200,125}
+    o.npc = true
+    o.moved = true
+    o.team = 2
+    o.stats.hp = 3
+    o.stats.armor = 3
     o.ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
 end
 
