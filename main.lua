@@ -16,6 +16,8 @@ dude = require('dude')
 a8 = require('anim8')
 tween = require('tween')
 aa = require('attackAnim')
+uicon = require('UIcontroller')
+ibut = require('ui/iconButton')
 
 
 img = {}
@@ -43,6 +45,8 @@ img.blueicon = lg.newImage('/assets/blueicon.png')
 img.orangeicon = lg.newImage('/assets/orangeicon.png')
 img.shield = lg.newImage('/assets/icon_12.png')
 img.hit = lg.newImage('/assets/icon_82.png')
+img.endturn = lg.newImage('/assets/endturn.png')
+img.retreat = lg.newImage('/assets/retreat.png')
 
 sheet = {}
 sheet.sample = a8.newGrid(32,32,img.fighter:getWidth(),img.fighter:getHeight())

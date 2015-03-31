@@ -10,6 +10,7 @@ function game.new()
      
     state.map = grid.newGridArea(lg:getWidth()*.9,lg:getHeight()*.9,48,lg:getWidth()/20,lg:getHeight()/20)
     state.control = pimp.new(state.map)
+    state.ui = uicon.new(state)
     
     state.collected = nil
     
@@ -33,7 +34,17 @@ function game.new()
     
     game.populate(state)
     
+    print('populated')
+    local etbut = ibut.new(lg.getWidth()-64,lg.getHeight()-64,state.ui,img.endturn,true)
+    local rbut = ibut.new(0,lg.getHeight()-64,state.ui,img.retreat,true)
+    rbut.click = function() state:triggerVictory() end
+    etbut.click = function() state:startNextPhase() end
+    state.ui:addElement(rbut)
+    state.ui:addElement(etbut)
+    
     inputAccepted = true
+    
+    
     
     return state
 end
@@ -42,34 +53,21 @@ function game:populate()
     math.randomseed(os.time())
     local level = lgen.generate(threatLevel,self.map.tw,self.map.th,4)
     lgen.spawn(level,self.control)
-    --[[pimp.addUnit(self.control,grid.findTileAtPos(self.map,5,1),"Fighter")
-    pimp.addUnit(self.control,grid.findTileAtPos(self.map,7,0),"Mage")
-    pimp.addUnit(self.control,grid.findTileAtPos(self.map,9,1),"Beastmaster")
-    pimp.addUnit(self.control,grid.findTileAtPos(self.map,9,0),"Ranger")
-    pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2),self.map.th-2),"Thief")
-    pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)-2,self.map.th-2),"Thief")
-    pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)-4,self.map.th-2),"Thief")
-    pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)-6,self.map.th-2),"Thief")
-    pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)+2,self.map.th-2),"Thief")
-    pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)+4,self.map.th-2),"Thief")
-    --pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2),self.map.th-3),"Thief")
-    --pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)-2,self.map.th-3),"Thief")
-    --pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)-4,self.map.th-3),"Thief")
-    --pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)-6,self.map.th-3),"Thief")
-    --pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)+2,self.map.th-3),"Thief")
-    --pimp.addUnit(self.control,grid.findTileAtPos(self.map,math.floor(self.map.tw/2)+4,self.map.th-3),"Thief")]]
+
 end
 
 function game:mousepressed(x,y,button)
     if inputAccepted then
-        local tile = grid.findTileAtCoord(self.map,x,y)
-        if tile and self.collected then
-            if tile.obj == nil and grid.checkCellInList(tile,self.collected.moves) then
-                pimp.placeUnit(self.control,tile,self.collected)
-                self.collected = nil
+        if not self.ui:click(x,y,button) then
+            local tile = grid.findTileAtCoord(self.map,x,y)
+            if tile and self.collected then
+                if tile.obj == nil and grid.checkCellInList(tile,self.collected.moves) then
+                    pimp.placeUnit(self.control,tile,self.collected)
+                    self.collected = nil
+                end
+            elseif tile and tile.obj and not self.collected and not tile.obj.npc then
+                self.collected = pimp.takeUnit(self.control,tile)
             end
-        elseif tile and tile.obj and not self.collected and not tile.obj.npc then
-            self.collected = pimp.takeUnit(self.control,tile)
         end
     end
 end
@@ -139,6 +137,9 @@ function game:draw()
     
     tut.draw()
     lg.print(threatLevel,0,0)
+    self.ui:draw()
+    
+    
 end
 
 function game:startNextPhase()
@@ -211,7 +212,7 @@ function game:update(dt)
         if complete then self:startNextPhase() end
     end
     
-    
+    self.ui:update(dt)
 end
 
 function game:triggerVictory()

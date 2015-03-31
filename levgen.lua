@@ -23,19 +23,17 @@ function lgen.generate(threat,width,height,heroes)
     local entList = {}
     local takenPlaces = {}
     local breakout = 0
+    local points = threat
     
-    while threat > 0 do
+    for i=0, threat do
         local randType = math.random(1,#dudeTypes)
         local choice = dudeTypes[randType]
         --place randomly in bottom half
         local rx = math.floor(math.random(1,width-1))
         local ry = math.floor(math.random(1,height/2)+(height/2)-1)
-        if checkPosFree(entList,rx,ry) and threat >= choice.cost then
+        if checkPosFree(entList,rx,ry) and points >= choice.cost then
             table.insert(entList,{class=choice.class,x=rx,y=ry})
-            threat = threat - choice.cost
-        else
-            breakout = breakout +1
-            if breakout > 5 then break end
+            points = points - choice.cost
         end
     end
     
