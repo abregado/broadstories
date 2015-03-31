@@ -7,7 +7,7 @@ inputAccepted = true
 
 function game.new()
     local state = {}
-     
+    
     state.map = grid.newGridArea(lg:getWidth()*.9,lg:getHeight()*.9,48,lg:getWidth()/20,lg:getHeight()/20)
     state.control = pimp.new(state.map)
     state.ui = uicon.new(state)
@@ -87,6 +87,13 @@ function game:draw()
     lg.setFont(font)
     self.map:draw()
     
+    if not inputAccepted then
+        lg.setColor(255,0,0)
+        lg.setLineWidth(5)
+        lg.rectangle("line",self.map.x-1,self.map.y-1,self.map.w+2,self.map.h+2)
+        lg.setLineWidth(1)
+    end
+    
     self.control:draw()
     if self.collected then
         self.collected:draw(mx,my,true)
@@ -128,12 +135,7 @@ function game:draw()
         end
     end
     
-    if not inputAccepted then
-        lg.setColor(255,0,0)
-        lg.setLineWidth(5)
-        lg.rectangle("line",self.map.x-1,self.map.y-1,self.map.w+2,self.map.h+2)
-        lg.setLineWidth(1)
-    end
+    
     
     tut.draw()
     lg.print(threatLevel,0,0)
