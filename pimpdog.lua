@@ -17,6 +17,22 @@ function pd.new(map)
     return o
 end
 
+function pd.countTeamMembers(self,team)
+    local result = 0
+    for i,v in ipairs(self.units) do
+        if v.team == team then result = result +1 end
+    end
+    return result
+end
+
+function pd.countHighestArmorInTeam(self,team)
+    local result = 0
+    for i,v in ipairs(self.units) do
+        if v.team == team and v.stats.armor > result then result = v.stats.armor end
+    end
+    return result
+end
+
 function pd.addToRegister(self,unit,force)
     if force then
         table.insert(self.animRegister,1,unit)

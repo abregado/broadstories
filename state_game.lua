@@ -8,7 +8,7 @@ inputAccepted = true
 function game.new()
     local state = {}
      
-    state.map = grid.newGridArea(lg:getWidth()*.75,lg:getHeight()*.75,32,lg:getWidth()/8,lg:getHeight()/8)
+    state.map = grid.newGridArea(lg:getWidth()*.9,lg:getHeight()*.9,48,lg:getWidth()/20,lg:getHeight()/20)
     state.control = pimp.new(state.map)
     
     state.collected = nil
@@ -26,15 +26,21 @@ function game.new()
     state.keypressed = game.keypressed
     state.mousepressed = game.mousepressed
     state.startNextPhase = game.startNextPhase
+    state.checkVictory = game.checkVictory
+    state.triggerVictory = game.triggerVictory
+    state.checkRetreat = game.checkRetreat
+    state.triggerRetreat = game.triggerRetreat
     
     game.populate(state)
+    
+    inputAccepted = true
     
     return state
 end
 
 function game:populate()
     math.randomseed(os.time())
-    local level = lgen.generate(6,self.map.tw,self.map.th,4)
+    local level = lgen.generate(threatLevel,self.map.tw,self.map.th,4)
     lgen.spawn(level,self.control)
     --[[pimp.addUnit(self.control,grid.findTileAtPos(self.map,5,1),"Fighter")
     pimp.addUnit(self.control,grid.findTileAtPos(self.map,7,0),"Mage")
@@ -72,7 +78,7 @@ function game:keypressed(key)
     if inputAccepted then
         if key == "escape" then love.event.quit() 
         elseif key == " " then self:startNextPhase()
-        elseif key == "r" then gs.switch(game.new()) end
+        elseif key == "r" then self:triggerVictory() end
     end
 end
 
@@ -132,11 +138,13 @@ function game:draw()
     end
     
     tut.draw()
-    lg.print(self.phase,0,0)
+    lg.print(threatLevel,0,0)
 end
 
 function game:startNextPhase()
     if self.phase == 0 then --end of player movement phase
+        --check for Retreat or Defeat
+        self:checkRetreat()
         --calculate list of damaged targets
         local victims = pimp.calculateAttackers(self.control,1)
         local injuries = pimp.calculateInjured(victims)
@@ -149,6 +157,8 @@ function game:startNextPhase()
     elseif self.phase == 1 then --end of player attack phase
         --clean up dead guys
         pimp.cleanDead(self.control)
+        --check for victory
+        self:checkVictory()
         --calculate enemy movement
         pimp.updateTeamMoves(self.control,2)
         pimp.doTeamAI(self.control,2)
@@ -165,6 +175,7 @@ function game:startNextPhase()
         pimp.cleanDead(self.control)
         --calculate hero movement
         pimp.updateTeamMoves(self.control,1)
+        pimp.updateTeamMoves(self.control,2)
         pimp.checkDamage(self.control)
         self.phase = 0
         inputAccepted = true
@@ -199,8 +210,36 @@ function game:update(dt)
         --trigger nextPhase when done
         if complete then self:startNextPhase() end
     end
-        
     
+    
+end
+
+function game:triggerVictory()
+    threatLevel = threatLevel + 1
+    gs.switch(trans.new({aa.new({trans.newFlyup("VICTORY!"),trans.newUnderbar("You defeated all enemies")})}))
+end
+
+function game:triggerRetreat()
+    gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You don't have enough heroes to win")})}))
+end
+
+function game:checkRetreat()
+    --victory is when all enemies are destroyed
+    --ask controller about enemy number
+    local heroes = pimp.countTeamMembers(self.control,1)
+    local highArmor = pimp.countHighestArmorInTeam(self.control,2)
+    if heroes < highArmor then
+        self:triggerRetreat()
+    end
+end
+
+function game:checkVictory()
+    --victory is when all enemies are destroyed
+    --ask controller about enemy number
+    local enemies = pimp.countTeamMembers(self.control,2)
+    if enemies == 0 then
+        self:triggerVictory()
+    end
 end
 
 return game

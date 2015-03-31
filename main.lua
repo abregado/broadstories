@@ -7,6 +7,7 @@ lm = love.mouse
 tut = require('tutorial')
 td = tut.td
 game = require('state_game')
+trans = require('state_trans')
 lgen = require('levgen')
 vl= require('hump-master/vector-light')
 grid = require('grid')
@@ -50,7 +51,7 @@ anims = {}
 anims.stand = a8.newAnimation(sheet.sample(3,1),1)
 anims.walk = a8.newAnimation(sheet.sample('3-4',1),0.3)
 
-maingame = game.new()
+threatLevel = 6
 
 --[[
 #############TODOS###############
@@ -83,7 +84,7 @@ win/lose conditions
 function love.load()
     lg.setDefaultFilter('nearest','nearest')
     gs.registerEvents()
-    gs.switch(maingame)
+    gs.switch(game.new())
 
 end
 

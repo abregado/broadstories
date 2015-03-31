@@ -46,8 +46,8 @@ function lgen.generate(threat,width,height,heroes)
             choice = heroTypes[i]
         end
         --place randomly in top quarter
-        local rx = math.floor(math.random(1,width/2)+(width/4))
-        local ry = math.floor(math.random(1,height/6)-1)
+        local rx = math.floor(math.random(1,width))
+        local ry = math.floor(math.random(1,3))
         if checkPosFree(entList,rx,ry) then
             table.insert(entList,{class=choice,x=rx,y=ry})
         end

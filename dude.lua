@@ -51,7 +51,7 @@ function d.newDeathAnim(corpse)
         local scale = corpse.map.ts/img.skelly:getHeight()*0.75
         
         lg.setColor(0,0,0,125)
-        lg.circle("fill",x or px,y or py,r/scale,20)
+        --lg.circle("fill",x or px,y or py,r/scale,20)
         lg.setColor(255,255,255,255-(self.off*2))
         local aoff = img.skelly:getHeight()/2*scale
         anims.stand:draw(img.skelly,px-aoff,py-(aoff*1.8),0,scale,scale)
