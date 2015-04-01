@@ -2,20 +2,21 @@
 local lm = love.mouse
 
 local colors = {but={},ui={}}
-colors.but.hover = {255,0,0}
+colors.but.hover = {90,90,220}
 colors.but.ready = {255,255,255}
 colors.but.locked = {0,0,0}
+colors.ui.border = {0,0,0}
 colors.ui.bg = {60,60,60}
-colors.ui.icon = {255,255,255}
+colors.ui.bghover = {30,30,30}
 
 ibutton = {}
 
-function ibutton.new(xin,yin,control,icon,ready)
+function ibutton.new(xin,yin,control,icon,ready,w,h)
 	local o = {}
 	o.x = xin
 	o.y = yin
-	o.w = 64
-	o.h = 64
+	o.w = w or 64
+	o.h = h or 64
 	o.control = control
 	o.hover = 18
 	
@@ -52,10 +53,17 @@ function ibutton:update(dt)
 end
 
 function ibutton:draw()
-	lg.setColor(colors.ui.bg)
-	lg.rectangle("fill",self.x-1,self.y-1,66,66)
-	lg.setColor(colors.ui.icon)
-	lg.rectangle("fill",self.x,self.y,64,64)
+	lg.setColor(colors.ui.border)
+	lg.rectangle("fill",self.x,self.y,self.w,self.h)
+    
+    if self:check(lm.getX(),lm.getY()) and self.ready then -- select coloration of the icon
+		lg.setColor(colors.ui.bghover)
+	else
+		lg.setColor(colors.ui.bg)
+	end
+    
+    local border = 0.2 * self.h
+	lg.rectangle("fill",self.x+border,self.y+border,self.w-(border*2),self.h-(border*2))
 	
 	if self:check(lm.getX(),lm.getY()) and self.ready then -- select coloration of the icon
 		lg.setColor(colors.but.hover)
@@ -65,7 +73,13 @@ function ibutton:draw()
 		lg.setColor(colors.but.locked)
 	end
 	
-	lg.draw(self.icon,self.x,self.y)
+    local scale = self.h/self.icon:getHeight()
+    if scale > 1 then scale = 1 end
+    
+    iconX = (self.w/2)-(self.icon:getWidth()/2)*scale
+    iconY = (self.h/2)-(self.icon:getHeight()/2)*scale
+    
+	lg.draw(self.icon,self.x+iconX,self.y+iconY,0,scale,scale)
 
 end
 

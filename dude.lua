@@ -1,9 +1,10 @@
+local pimp = require('pimpdog')
 local lg = love.graphics
 
 
 d = {}
 
-function d.new(controller,class)
+function d.new(controller,class,team)
     local o = {}
     o.map = controller.map
     o.cell = nil
@@ -11,21 +12,35 @@ function d.new(controller,class)
     o.map = controller.map
     o.color = {math.random(0,255),math.random(0,255),math.random(0,255)}
     o.isDead = false
-    o.moves = {}
-    o.moved = false
-    o.attacking = false
+    
     o.x,o.y = 0,0
     o.moveTween = tween.new(1,o,{x=0,y=0})
     
+    o.moveShape = grid.newCross(1)
+    o.moves = {}
+    o.moved = false
     
+    o.attackShape = grid.newCross(1)
+    o.attacking = false
+    
+    
+    o.class = "Generic NPC"
     o.stats = {}
-    o.stats.hp = 3
-    o.stats.armor = 2
+    o.stats.hp = 1
+    o.stats.armor = 1
     o.stats.str = 1
+    
     o.damage = 0
     o.attackers = {}
+        
+    o.img = 1
+    o.team = team or -1
+    o.ai = function(self) return d.avoidEnemy(self) end
+    o.npc = true
+    if PLAYERTEAM and team == PLAYERTEAM then o.npc = false end
     
     d.setClass(o,class or nil)
+    
     
     o.draw = d.draw
     o.arrive = d.arrive
@@ -48,13 +63,13 @@ function d.newDeathAnim(corpse)
         
         local r = corpse.map.ts/2.5
         local offset = (corpse.map.ts/2)
-        local scale = corpse.map.ts/img.skelly:getHeight()*0.75
+        local scale = corpse.map.ts/unitImg[1]:getHeight()*0.75
         
         lg.setColor(0,0,0,125)
         --lg.circle("fill",x or px,y or py,r/scale,20)
         lg.setColor(255,255,255,255-(self.off*2))
-        local aoff = img.skelly:getHeight()/2*scale
-        anims.stand:draw(img.skelly,px-aoff,py-(aoff*1.8),0,scale,scale)
+        local aoff = unitImg[1]:getHeight()/2*scale
+        anims.stand:draw(unitImg[1],px-aoff,py-(aoff*1.8),0,scale,scale)
         
         lg.setColor(255,255,255,255-(self.off*2))
         offset = img.skull:getWidth()/2
@@ -86,178 +101,23 @@ end
 function d.kill(self)
     self.isDead = true
     self.control:addToRegister(aa.new({d.newDeathAnim(self)}))
-    self.img = img.skelly
+    self.img = 1
 end
 
 function d.setClass(o,class)
-    if class == "Ranger" then
-        d.setClassRanger(o)
-    elseif class == "Mage" then
-        d.setClassMage(o)
-    elseif class == "Beastmaster" then
-        d.setClassBeastmaster(o)
-    elseif class == "Fighter" then
-        d.setClassFighter(o)
-    elseif class == "Warlock" then
-        d.setClassWarlock(o)
-    elseif class == "Demon" then
-        d.setClassDemon(o)
-    elseif class == "Thief" then
-        d.setClassThief(o)
-    elseif class == "ThiefArcher" then
-        d.setClassThiefArcher(o)
-    elseif class == "Tough" then
-        d.setClassTough(o)
-    else
-        d.setClassGenericNPC(o)
+    if o.control.unitTypes[class] then
+        local classData = o.control.unitTypes[class]
+    
+        o.class = tostring(classData.class)
+        o.moveShape = classData.moveShape()
+        o.attackShape = classData.attackShape()
+        o.img = tonumber(classData.img)
+        o.color = classData.color
+        o.stats.hp = tonumber(classData.stats.hp)
+        o.stats.armor = tonumber(classData.stats.armor)
+        o.stats.str = tonumber(classData.stats.str)
+        o.ai = classData.ai
     end
-end
-
-function d.setClassFighter(o)
-    o.moveShape = grid.newCircle(2)
-    o.attackShape = grid.newCross(1)
-    o.class = "Fighter"
-    o.img = img.fighter
-    o.color = {100,100,255}
-    o.npc = false
-    o.team = 1
-    o.stats.hp = 4
-    o.stats.armor = 3
-end
-
-function d.setClassGenericNPC(o)
-    o.moveShape = grid.newCross(1)
-    o.attackShape = grid.newCross(1)
-    o.class = "Generic NPC"
-    local skins = {img.boy,img.girl}
-    local skin = math.random(1,#skins)
-    o.img = skins[skin]
-    o.color = {255,255,255}
-    o.npc = true
-    o.team = -1
-    o.ai = function(self) return d.avoidEnemy(self) end
-    o.stats.armor = 1
-    o.stats.hp = 1
-end
-
-function d.setClassRanger(o)
-    o.moveShape = grid.newBox(1)
-    o.attackShape = grid.findCompliment(grid.newStar(10),grid.newStar(1))
-    o.class = "Ranger"
-    o.img = img.ranger
-    o.color = {203,178,151}
-    o.npc = false
-    o.team = 1
-    o.stats.hp = 2
-
-end
-
-function d.setClassMage(o)
-    o.moveShape = grid.newBox(1)
-    o.attackShape = grid.findCompliment(grid.newCross(10),grid.newCross(2))
-    o.class = "Mage"
-    o.img = img.mage
-    o.color = {192,20,169}
-    o.npc = false
-    o.team = 1
-    o.stats.armor = 1
-    o.stats.hp = 3
-
-end
-
-function d.setClassWarlock(o)
-    --o.moveShape = grid.joinLists(grid.newCircle(1),grid.newRing(10,11))
-    o.moveShape = grid.joinLists(grid.newCircle(1),grid.newRing(10,11))
-    o.attackShape = grid.newCross(8)
-    o.class = "Warlock"
-    o.img = img.warlock
-    o.color = {192,20,169}
-    o.npc = true
-    o.moved = true
-    o.team = 2
-    o.ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
-
-end
-
-function d.setClassDemon(o)
-    o.moveShape = grid.newCircle(2)
-    o.attackShape = grid.newCross(1)
-    o.class = "Demon"
-    o.img = img.demon
-    o.color = {225,125,125}
-    o.npc = true
-    o.moved = true
-    o.team = 2
-    o.ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
-
-end
-
-function d.setClassThief(o)
-    o.moveShape = grid.newCross(2)
-    o.attackShape = grid.newCross(1)
-    o.class = "Thief"
-    local skins = {img.thief1,img.thief2,img.thief3,img.thief4}
-    local skin = math.random(1,#skins)
-    o.img = skins[skin]
-    o.color = {125,200,125}
-    o.npc = true
-    o.moved = true
-    o.team = 2
-    o.stats.hp = 2
-    o.stats.armor = 2
-    o.ai = function(self) return d.pickClosestAttack(self) or d.moveTowardEnemy(self) end
-end
-
-function d.setClassThiefArcher(o)
-    o.moveShape = grid.newCross(2)
-    o.attackShape = grid.newRing(3,4)
-    o.class = "ThiefArcher"
-    local skins = {img.thief1,img.thief2,img.thief3,img.thief4}
-    local skin = math.random(1,#skins)
-    o.img = skins[skin]
-    o.color = {125,200,125}
-    o.npc = true
-    o.moved = true
-    o.team = 2
-    o.stats.hp = 2
-    o.stats.armor = 2
-    o.ai = function(self) return d.pickClosestAttack(self) or d.moveTowardEnemy(self) end
-end
-
-function d.setClassTough(o)
-    o.moveShape = grid.newCross(2)
-    o.attackShape = grid.newStar(1)
-    o.class = "Tough"
-    local skins = {img.thief1,img.thief2,img.thief3,img.thief4}
-    local skin = math.random(1,#skins)
-    o.img = skins[skin]
-    o.color = {125,200,125}
-    o.npc = true
-    o.moved = true
-    o.team = 2
-    o.stats.hp = 3
-    o.stats.armor = 3
-    o.ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
-end
-
-function d.setClassBeastmaster(o)
-    o.moveShape = grid.joinLists(grid.newBox(1),grid.newCross(2))
-    local bmgrid = {
-        {0,0,0,0,0,0,0},
-        {0,0,1,0,1,0,0},
-        {0,1,1,0,1,1,0},
-        {0,0,0,0,0,0,0},
-        {0,1,1,0,1,1,0},
-        {0,0,1,0,1,0,0},
-        {0,0,0,0,0,0,0}
-        }
-    o.attackShape = grid.newShapeFromGrid(bmgrid)
-    o.class = "Beastmaster"
-    o.img = img.beastmaster
-    o.color = {86,188,109}
-    o.npc = false
-    o.team = 1
-    o.stats.hp = 4
 end
 
 function d.endTurn(self)       
@@ -301,7 +161,7 @@ function d.draw(self,x,y,showStats)
     local px,py = self.x,self.y
     local r = self.map.ts/2.5
     local offset = (self.map.ts/2)
-    local scale = self.map.ts/self.img:getHeight()*0.75
+    local scale = self.map.ts/self.control.spriteList[self.img]:getHeight()*0.75
     
     --lg.setColor(self.color)
     lg.setColor(0,0,0,125)
@@ -309,11 +169,11 @@ function d.draw(self,x,y,showStats)
     --lg.setColor(0,0,0)
     --lg.circle("line",x or px,y or py,r/scale,20)
     lg.setColor(255,255,255)
-    local aoff = self.img:getHeight()/2*scale
+    local aoff = self.control.spriteList[self.img]:getHeight()/2*scale
     if self.moved then
-        anims.stand:draw(self.img,x or px-aoff,y or py-(aoff*1.8),0,scale,scale)
+        anims.stand:draw(self.control.spriteList[self.img],x or px-aoff,y or py-(aoff*1.8),0,scale,scale)
     else
-        anims.walk:draw(self.img,x or px-aoff,y or py-(aoff*1.8),0,scale,scale)
+        anims.walk:draw(self.control.spriteList[self.img],x or px-aoff,y or py-(aoff*1.8),0,scale,scale)
     end
     
     --[[if self.attacking and not x and not y then

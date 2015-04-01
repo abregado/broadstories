@@ -2,13 +2,15 @@
 local lg = love.graphics
 local vl = require('hump-master/vector-light')
 
-local cellColor = {101,153,51}
+local cellColor = {80,80,80}
+local walkableColor = {101,153,51}
 local objColor = {101,190,51}
 local gridColor = {37,76,0}
 
 local g = {}
 
 function g.newGridArea(width,height,tilesize,ox,oy)
+print("building new grid of w/h pixels")
     o = {}
     o.tilelist = {}
     o.tileset = {}
@@ -28,6 +30,7 @@ function g.newGridArea(width,height,tilesize,ox,oy)
 end
 
 function g.newGrid(width,height,tilesize,ox,oy)
+    print("building new grid of w/h tiles")
     local o = {}
     o.tilelist = {}
     o.tileset = {}
@@ -46,7 +49,7 @@ function g.newGrid(width,height,tilesize,ox,oy)
 end
 
 function g.placeObject(map,cell,obj)
-    if cell.obj == nil then
+    if cell.obj == nil and cell.walkable and cell.active then
         cell.obj = obj
         return true
     else
@@ -71,6 +74,8 @@ end
 function g.newCell(x,y)
     local o = {}
     o.pos = {x=x,y=y}
+    o.active = true
+    o.walkable = true
     o.obj = nil
     return o
 end
@@ -92,8 +97,12 @@ function g.draw(self)
         local x,y = g.getOrigin(self,v)
         if v.obj then
             lg.setColor(objColor)
-        else
+        elseif v.walkable then
+            lg.setColor(walkableColor)
+        elseif v.active then
             lg.setColor(cellColor)
+        else
+            lg.setColor(0,0,0)
         end
         lg.rectangle("fill",x,y,self.ts,self.ts)
         lg.setColor(gridColor)
@@ -104,13 +113,13 @@ function g.draw(self)
 end
 
 function g.drawObjects(self)
-    for i,v in ipairs(self.tilelist) do 
+    --[[for i,v in ipairs(self.tilelist) do 
         if v.obj then
             --lg.setColor(v.obj.color)
             --lg.rectangle("fill",v.x+self.x,v.y+self.y,self.ts,self.ts)
             v.obj:draw()
         end
-    end
+    end]]
 end
 
 
@@ -249,11 +258,11 @@ function g.joinLists(list1,list2)
     return result
 end
 
-function g.displaceList(self,list,x,y)
+function g.displaceList(self,list,x,y,ignoreWalkable)
     local result = {}
     for i,v in ipairs(list) do
         local newCell = g.findTileAtPos(self,v.pos.x+x,v.pos.y+y)
-        if newCell then table.insert(result,newCell) end
+        if newCell and newCell.active and (ignoreWalkable or newCell.walkable) then table.insert(result,newCell) end
     end
     return result
 end
@@ -410,6 +419,26 @@ function g.newShapeFromGrid(grid)
         end
     end
     return result
+end
+
+function g.getGridDims(w,h)
+    local uibarsize = 0.13 --percent of screen height
+
+    --calculate space available for map
+    local s = {w=lg:getWidth(),h=lg:getHeight()*(1-uibarsize)}
+    local tw = 48
+    
+    --if not enough space exists, shrink the tiles
+    while s.w/tw < w or s.h/tw < h do
+        tw = tw - 1
+    end    
+    
+    print ("tilesize after resize"..tw)
+    
+    local xo = (s.w-(tw*w))/2
+    local yo = ((s.h-(tw*h))/2)+(lg:getHeight()*uibarsize)
+    
+    return tw,xo,yo
 end
 
 return g

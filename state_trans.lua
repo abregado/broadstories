@@ -72,7 +72,33 @@ function trans:enter(from)
     self.from = from
 end
 
-function trans.newFlyup(text)
+function trans.newFadeout(text,startY)
+    local o = {}
+    o.draw = function(self)
+        
+        local fontHeight = flyupFont:getHeight(self.text)
+        local fontWidth = flyupFont:getWidth(self.text)
+        
+        lg.setColor(barColor)
+        lg.rectangle("fill",0,self.y-10,lg.getWidth(),fontHeight+20)
+        
+        lg.setColor(fontColor)
+        lg.setFont(flyupFont)
+        lg.print(self.text,self.x+lg.getWidth()/2-(fontWidth/2),self.y)
+
+        
+    end
+    o.text = text
+    o.x = 0
+    o.y = startY or lg:getHeight()/2
+    o.alpha = 255
+    o.tween = tween.new(5,o,{alpha=0},'outQuad')
+    
+    return o
+end
+
+
+function trans.newFlyup(text,endY)
     local o = {}
     o.draw = function(self)
         
@@ -91,12 +117,12 @@ function trans.newFlyup(text)
     o.text = text
     o.x = 0
     o.y = lg.getHeight()
-    o.tween = tween.new(2,o,{y=-50},'outQuad')
+    o.tween = tween.new(5,o,{y=endY or -100},'outQuad')
     
     return o
 end
 
-function trans.newUnderbar(text)
+function trans.newUnderbar(text,endY)
     local o = {}
     o.draw = function(self)
         
@@ -115,7 +141,7 @@ function trans.newUnderbar(text)
     o.text = text
     o.x = 0
     o.y = lg.getHeight()+40
-    o.tween = tween.new(2,o,{y=-10},'outQuad')
+    o.tween = tween.new(5,o,{y=endY or -60},'outQuad')
     
     return o
 end

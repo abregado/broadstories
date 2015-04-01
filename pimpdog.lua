@@ -1,9 +1,12 @@
 pd = {}
 
-function pd.new(map)
+function pd.new(map,unitTypes,spriteList)
+    print("building new dog")
     o={}
     o.map = map
     o.units = {}
+    o.unitTypes = unitTypes or {}
+    o.spriteList = spriteList or {}
     
     o.animRegister = {}
     o.injuryRegister = {}
@@ -13,7 +16,6 @@ function pd.new(map)
     o.addUnit = pd.addUnit
     o.draw = pd.draw
     o.addToRegister = pd.addToRegister
-    
     return o
 end
 
@@ -69,8 +71,8 @@ function pd.update(self,dt)
     return #self.animRegister == 0 
 end
 
-function pd.addUnit(self,cell,class)
-    local newDude = dude.new(self,class)
+function pd.addUnit(self,cell,class,team)
+    local newDude = dude.new(self,class,team)
     if grid.placeObject(self.map,cell,newDude) then
         table.insert(self.units,newDude)
         dude.setCell(newDude,cell)

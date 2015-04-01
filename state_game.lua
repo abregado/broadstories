@@ -2,25 +2,43 @@ local game = {}
 
 local font = lg.newFont()
 
-
 inputAccepted = true
 
-function game.new()
+function game.new(map,control)
     local state = {}
     
-    state.map = grid.newGridArea(lg:getWidth()*.9,lg:getHeight()*.9,48,lg:getWidth()/20,lg:getHeight()/20)
-    state.control = pimp.new(state.map)
+    if map then
+        state.map = map
+    else
+        tw,xo,yo = grid.getGridDims(15,11)
+        state.map = grid.newGrid(15,11,tw,xo,yo)
+    end
+    
+    if control then
+        state.control = control
+    else
+        state.control = pimp.new(state.map,unitTypes,unitImg)
+    end
+    
     state.ui = uicon.new(state)
+    
+    --init UI buttons. move to separate class later
+    local buttonHeight = lg:getHeight()-state.map.h-4
+    if buttonHeight > 72 then buttonHeight = 72 end
+    
+    local etbut = ibut.new(lg:getWidth()-(buttonHeight*1.5),0,state.ui,img.endturn,true,buttonHeight*1.5,buttonHeight)
+    local sbut = ibut.new(4+(buttonHeight*1.5),0,state.ui,img.cog,true,buttonHeight,buttonHeight)
+    local rbut = ibut.new(0,0,state.ui,img.retreat,true,buttonHeight*1.5,buttonHeight)
+    rbut.click = function() state:triggerRestart() end
+    etbut.click = function() state:startNextPhase() end
+    state.ui:addElement(rbut)
+    state.ui:addElement(etbut)
+    state.ui:addElement(sbut)
+    
     
     state.collected = nil
     
     state.phase = 0
-    --phase 0: player movement
-    --phase 1: player calculate attacks and generate animations, calculate teams
-    --phase 2: npc team 1 move
-    --phase 3: npc team 1 calculate attacks and animate 
-    --if more teams goto phase 2 with next team
-    --goto phase 0
     
     state.draw = game.draw
     state.update = game.update
@@ -31,16 +49,14 @@ function game.new()
     state.triggerVictory = game.triggerVictory
     state.checkRetreat = game.checkRetreat
     state.triggerRetreat = game.triggerRetreat
+    state.triggerRestart = game.triggerRestart
     
-    game.populate(state)
+    if not control then
+        lgen.generate(state.control,4,threatLevel)
+        print('populated by default')
+    end
     
-    print('populated')
-    local etbut = ibut.new(lg.getWidth()-64,lg.getHeight()-64,state.ui,img.endturn,true)
-    local rbut = ibut.new(0,lg.getHeight()-64,state.ui,img.retreat,true)
-    rbut.click = function() state:triggerVictory() end
-    etbut.click = function() state:startNextPhase() end
-    state.ui:addElement(rbut)
-    state.ui:addElement(etbut)
+    
     
     inputAccepted = true
     
@@ -49,12 +65,8 @@ function game.new()
     return state
 end
 
-function game:populate()
-    math.randomseed(os.time())
-    local level = lgen.generate(threatLevel,self.map.tw,self.map.th,4)
-    lgen.spawn(level,self.control)
 
-end
+
 
 function game:mousepressed(x,y,button)
     if inputAccepted then
@@ -94,51 +106,55 @@ function game:draw()
         lg.setLineWidth(1)
     end
     
-    self.control:draw()
-    if self.collected then
-        self.collected:draw(mx,my,true)
-        local ox,oy = grid.getCenter(self.map,self.collected.cell)
-        lg.line(mx,my,ox,oy)
-        for i,v in ipairs(self.collected.moves) do
-            lg.setColor(0,0,255,90)
-            local x,y = grid.getOrigin(self.map,v)
-            lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
-        end
-        hoverCell = grid.findTileAtCoord(self.map,mx,my)
-        if hoverCell then
-            local attackArea = grid.displaceList(self.map,self.collected.attackShape,hoverCell.pos.x,hoverCell.pos.y)
-            for i,v in ipairs(attackArea) do
-                    lg.setColor(255,0,0,30)
-                    local x,y = grid.getOrigin(self.map,v)
-                    lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
-            end
-        end
-    else
-        hoverCell = grid.findTileAtCoord(self.map,mx,my)
-        
-        if hoverCell and hoverCell.obj then
-            local ox,oy = grid.getCenter(self.map,hoverCell.obj.cell)
+    
+    
+    if inputAccepted then
+        if self.collected then
+            self.collected:draw(mx,my,true)
+            local ox,oy = grid.getCenter(self.map,self.collected.cell)
             lg.line(mx,my,ox,oy)
-            for i,v in ipairs(hoverCell.obj.moves) do
-                lg.setColor(0,0,255,30)
+            for i,v in ipairs(self.collected.moves) do
+                lg.setColor(0,0,255,90)
                 local x,y = grid.getOrigin(self.map,v)
                 lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
             end
-        
-            local attackArea = grid.displaceList(self.map,hoverCell.obj.attackShape,hoverCell.pos.x,hoverCell.pos.y)
-            for i,v in ipairs(attackArea) do
-                    lg.setColor(255,0,0,90)
+            hoverCell = grid.findTileAtCoord(self.map,mx,my)
+            if hoverCell then
+                local attackArea = grid.displaceList(self.map,self.collected.attackShape,hoverCell.pos.x,hoverCell.pos.y)
+                for i,v in ipairs(attackArea) do
+                        lg.setColor(255,0,0,30)
+                        local x,y = grid.getOrigin(self.map,v)
+                        lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
+                end
+            end
+        else
+            hoverCell = grid.findTileAtCoord(self.map,mx,my)
+            
+            if hoverCell and hoverCell.obj then
+                local ox,oy = grid.getCenter(self.map,hoverCell.obj.cell)
+                lg.line(mx,my,ox,oy)
+                for i,v in ipairs(hoverCell.obj.moves) do
+                    lg.setColor(0,0,255,30)
                     local x,y = grid.getOrigin(self.map,v)
                     lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
+                end
+            
+                local attackArea = grid.displaceList(self.map,hoverCell.obj.attackShape,hoverCell.pos.x,hoverCell.pos.y)
+                for i,v in ipairs(attackArea) do
+                        lg.setColor(255,0,0,90)
+                        local x,y = grid.getOrigin(self.map,v)
+                        lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
+                end
+                hoverCell.obj:draw(nil,nil,true)
             end
-            hoverCell.obj:draw(nil,nil,true)
         end
+    
     end
     
-    
+    self.control:draw()
     
     tut.draw()
-    lg.print(threatLevel,0,0)
+    lg.print(threatLevel,0,lg:getHeight()-10)
     self.ui:draw()
     
     
@@ -226,11 +242,15 @@ function game:triggerRetreat()
     gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You don't have enough heroes to win")})}))
 end
 
+function game:triggerRestart()
+    gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You gave up.")})}))
+end
+
 function game:checkRetreat()
     --victory is when all enemies are destroyed
     --ask controller about enemy number
-    local heroes = pimp.countTeamMembers(self.control,1)
-    local highArmor = pimp.countHighestArmorInTeam(self.control,2)
+    local heroes = pimp.countTeamMembers(self.control,PLAYERTEAM)
+    local highArmor = pimp.countHighestArmorInTeam(self.control,ENEMYTEAM)
     if heroes < highArmor then
         self:triggerRetreat()
     end
@@ -239,7 +259,7 @@ end
 function game:checkVictory()
     --victory is when all enemies are destroyed
     --ask controller about enemy number
-    local enemies = pimp.countTeamMembers(self.control,2)
+    local enemies = pimp.countTeamMembers(self.control,ENEMYTEAM)
     if enemies == 0 then
         self:triggerVictory()
     end

@@ -1,4 +1,4 @@
-DEBUG_MODE = true
+DEBUG_MODE = false
 if DEBUG_MODE then require ('lovedebug') end
 gs = require('hump-master/gamestate') 
 
@@ -12,31 +12,37 @@ lgen = require('levgen')
 vl= require('hump-master/vector-light')
 grid = require('grid')
 pimp = require('pimpdog')
+unitTypes = require('unitTypes')
 dude = require('dude')
 a8 = require('anim8')
 tween = require('tween')
 aa = require('attackAnim')
 uicon = require('UIcontroller')
 ibut = require('ui/iconButton')
+importer = require('importer')
+
+PLAYERTEAM = 1
+ENEMYTEAM = 2
+
+
+unitImg = {}
+unitImg[1] = lg.newImage('/assets/skl1.png') --skelly
+unitImg[2] = lg.newImage('/assets/ybo1.png') --generic boy
+unitImg[3] = lg.newImage('/assets/pdn4.png') --fighter
+unitImg[4] = lg.newImage('/assets/ftr3.png') --ranger
+unitImg[5] = lg.newImage('/assets/amg2.png') --mage
+unitImg[6] = lg.newImage('/assets/smr4.png') --beastmaster
+unitImg[7] = lg.newImage('/assets/thf1.png')
+unitImg[8] = lg.newImage('/assets/thf2.png')
+unitImg[9] = lg.newImage('/assets/thf3.png')
+unitImg[10] = lg.newImage('/assets/thf4.png') 
+unitImg[11] = lg.newImage('/assets/npc6.png') --goatlord
+unitImg[12] = lg.newImage('/assets/npc5.png') --warlock
+unitImg[13] = lg.newImage('/assets/dvl1.png') --demon
+
 
 
 img = {}
-img.fighter = lg.newImage('/assets/pdn4.png')
-img.beastmaster = lg.newImage('/assets/smr4.png')
-img.warlock = lg.newImage('/assets/npc5.png')
-img.ranger = lg.newImage('/assets/ftr3.png')
-img.demon = lg.newImage('/assets/dvl1.png')
-img.mage = lg.newImage('/assets/amg2.png')
-img.hellknight = lg.newImage('/assets/npc3.png')
-img.goatlord = lg.newImage('/assets/npc6.png')
-img.thief1 = lg.newImage('/assets/thf1.png')
-img.thief2 = lg.newImage('/assets/thf2.png')
-img.thief3 = lg.newImage('/assets/thf3.png')
-img.thief4 = lg.newImage('/assets/thf4.png')
-img.boy = lg.newImage('/assets/ybo1.png')
-img.girl = lg.newImage('/assets/ygr1.png')
-img.skelly = lg.newImage('/assets/skl1.png')
-
 img.heart = lg.newImage('/assets/heart_0.png')
 img.attack = lg.newImage('/assets/attack.png')
 img.damage = lg.newImage('/assets/damage.png')
@@ -47,15 +53,22 @@ img.shield = lg.newImage('/assets/icon_12.png')
 img.hit = lg.newImage('/assets/icon_82.png')
 img.endturn = lg.newImage('/assets/endturn.png')
 img.retreat = lg.newImage('/assets/retreat.png')
+img.cog = lg.newImage('/assets/settings.png')
+
+levels = {}
+levels.demo = require('levels/broadstories_l1')
+
+--img.tileset = lg.newImage(levels.demo.tilesets[1].image)
 
 sheet = {}
-sheet.sample = a8.newGrid(32,32,img.fighter:getWidth(),img.fighter:getHeight())
+sheet.sample = a8.newGrid(32,32,unitImg[1]:getWidth(),unitImg[1]:getHeight())
+--sheet.terrain = a8.newGrid(levels.demo.tilewidth,levels.demo.tileheight,img.tileset:getWidth(),img.tileset:getHeight())
 
 anims = {}
 anims.stand = a8.newAnimation(sheet.sample(3,1),1)
 anims.walk = a8.newAnimation(sheet.sample('3-4',1),0.3)
 
-threatLevel = 6
+threatLevel = 4
 
 --[[
 #############TODOS###############
@@ -88,7 +101,7 @@ win/lose conditions
 function love.load()
     lg.setDefaultFilter('nearest','nearest')
     gs.registerEvents()
-    gs.switch(game.new())
+    gs.switch(importer.import(levels.demo,{10},unitTypes,unitImg))
 
 end
 

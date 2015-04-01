@@ -1,64 +1,58 @@
 local grid = require('grid')
 local lgen = {}
 
-
-local dudeTypes = {
-    {class="Thief",cost=1},
-    {class="Thief",cost=1},
-    {class="Thief",cost=1},
-    {class="Thief",cost=1},
-    {class="Thief",cost=1},
-    {class="Thief",cost=1},
-    {class="Thief",cost=1},
-    {class="Demon",cost=3},
-    {class="Warlock",cost=4},
-    {class="ThiefArcher",cost=2},
-    {class="Tough",cost=4}
-    }
-    
-local heroTypes = {"Fighter","Mage","Beastmaster","Ranger"}
-    
-
-function lgen.generate(threat,width,height,heroes)
-    local entList = {}
-    local takenPlaces = {}
-    local breakout = 0
-    local points = threat
-    
-    for i=0, threat do
-        local randType = math.random(1,#dudeTypes)
-        local choice = dudeTypes[randType]
-        --place randomly in bottom half
-        local rx = math.floor(math.random(1,width-1))
-        local ry = math.floor(math.random(1,height/2)+(height/2)-1)
-        if checkPosFree(entList,rx,ry) and points >= choice.cost then
-            table.insert(entList,{class=choice.class,x=rx,y=ry})
-            points = points - choice.cost
-        end
-    end
-    
-    
-    for i=1,heroes do
-        local choice = "Fighter"
-        if i <= # heroTypes then
-            choice = heroTypes[i]
-        end
-        --place randomly in top quarter
-        local rx = math.floor(math.random(1,width))
-        local ry = math.floor(math.random(1,3))
-        if checkPosFree(entList,rx,ry) then
-            table.insert(entList,{class=choice,x=rx,y=ry})
-        end
-    end
-    
-    return entList    
+function lgen.generate(control,heroes,threat)
+    lgen.generateEnemies(control,threat)
+    lgen.generateHeroes(control,heroes)
 end
 
-function lgen.spawn(entList,controller)
-    for i,v in ipairs(entList) do
-        local tileLoc = grid.findTileAtPos(controller.map,v.x,v.y)
-        --print(v.x,v.y,tileLoc,v.class)
-        controller:addUnit(tileLoc,v.class)
+function lgen.generateHeroes(control,num)
+    local map = control.map
+    
+    local tileList = grid.joinLists(grid.findAllAtY(map,0),grid.findAllAtY(map,1))
+    
+    for i=1,num do
+        local randTile = math.random(1,#tileList)
+        local cell = table.remove(tileList,randTile)
+        control:addUnit(cell,i,PLAYERTEAM or 1)
+    end
+end
+
+function lgen.generateEnemies(control,threat)
+    local map = control.map
+    local tileList = grid.joinLists(grid.findAllAtY(map,map.th-1),grid.findAllAtY(map,map.th-2))
+    local enemyList = {}
+    local rand = math.random(1,2)
+    
+    for i,v in pairs(control.unitTypes) do
+        if v.weight > 0 then
+            v.id = i
+            for i=1,v.weight do
+                table.insert(enemyList,v)
+            end
+        end
+    end
+    print(#tileList,#enemyList)
+    
+    local spent = 0
+    for i=1,10 do
+        lgen.trimListToCost(enemyList,threat-spent)
+        if threat > spent and #enemyList > 1 and #tileList > 1 then
+            rand = math.random(1,#tileList)
+            local cell = table.remove(tileList,rand)
+            rand = math.random(1,#enemyList)
+            local dude = enemyList[rand]
+            control:addUnit(cell,dude.id,ENEMYTEAM or 2)
+            spent = spent + dude.cost
+        end
+    end
+end
+
+function lgen.trimListToCost(list,cost)
+    for i,v in ipairs(list) do
+        if v.cost > cost then
+            table.remove(list,i)
+        end
     end
 end
 
