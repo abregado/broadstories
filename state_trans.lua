@@ -52,7 +52,7 @@ function trans:update(dt)
             table.remove(self.animRegister,1) 
         end
     else
-       gs.switch(game.new()) 
+       buildNextLevel()
     end
 end
 
@@ -117,12 +117,12 @@ function trans.newFlyup(text,endY)
     o.text = text
     o.x = 0
     o.y = lg.getHeight()
-    o.tween = tween.new(5,o,{y=endY or -100},'outQuad')
+    o.tween = tween.new(3,o,{y=endY or -100},'outQuad')
     
     return o
 end
 
-function trans.newUnderbar(text,endY)
+function trans.newUnderbar(text,endY,bad)
     local o = {}
     o.draw = function(self)
         
@@ -135,13 +135,15 @@ function trans.newUnderbar(text,endY)
         lg.setColor(fontColor)
         lg.setFont(underbarFont)
         lg.print(self.text,self.x+lg.getWidth()/2-(fontWidth/2),self.y)
-
+        
+        if bad then lg.setColor(255,0,0,60) else lg.setColor(0,0,255,60) end
+        lg.rectangle("fill",0,self.y+fontHeight+10,lg:getWidth(),1000)
         
     end
     o.text = text
     o.x = 0
     o.y = lg.getHeight()+40
-    o.tween = tween.new(5,o,{y=endY or -60},'outQuad')
+    o.tween = tween.new(3,o,{y=endY or -60},'outQuad')
     
     return o
 end

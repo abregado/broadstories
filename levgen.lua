@@ -10,6 +10,7 @@ function lgen.generateHeroes(control,num)
     local map = control.map
     
     local tileList = grid.joinLists(grid.findAllAtY(map,0),grid.findAllAtY(map,1))
+    tileList = grid.returnWalkable(tileList)
     
     for i=1,num do
         local randTile = math.random(1,#tileList)
@@ -21,6 +22,7 @@ end
 function lgen.generateEnemies(control,threat)
     local map = control.map
     local tileList = grid.joinLists(grid.findAllAtY(map,map.th-1),grid.findAllAtY(map,map.th-2))
+    tileList = grid.returnWalkable(tileList)
     local enemyList = {}
     local rand = math.random(1,2)
     

@@ -18,7 +18,7 @@ function d.new(controller,class,team)
     
     o.moveShape = grid.newCross(1)
     o.moves = {}
-    o.moved = false
+    o.moved = true
     
     o.attackShape = grid.newCross(1)
     o.attacking = false
@@ -37,7 +37,7 @@ function d.new(controller,class,team)
     o.team = team or -1
     o.ai = function(self) return d.avoidEnemy(self) end
     o.npc = true
-    if PLAYERTEAM and team == PLAYERTEAM then o.npc = false end
+    if PLAYERTEAM and team == PLAYERTEAM then o.npc = false o.moved = false end
     
     d.setClass(o,class or nil)
     

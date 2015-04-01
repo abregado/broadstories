@@ -16,6 +16,7 @@ function pd.new(map,unitTypes,spriteList)
     o.addUnit = pd.addUnit
     o.draw = pd.draw
     o.addToRegister = pd.addToRegister
+    o.countTeamMembers = pd.countTeamMembers
     return o
 end
 

@@ -27,7 +27,14 @@ function imp.import(levelLua,blockTileList,unitTypes,spriteList)
     --add ents from level data
     imp.importEnts(map,control,levelLua,unitTypes)
     --check if there are any units on team 1 (otherwise generate new ones)
+    if control:countTeamMembers(PLAYERTEAM or 1) == 0 then
+        lgen.generateHeroes(control,4)
+    end
+    
     --check if there are any units on team 2 (otherwise generate new ones)
+    if control:countTeamMembers(ENEMYTEAM or 2) == 0 then
+        lgen.generateEnemies(control,threatLevel or 6)
+    end
     
     --generate new gamestate providing grid and control objects
     --return new gamestate

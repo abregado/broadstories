@@ -94,22 +94,24 @@ end
 
 function g.draw(self)
     for i,v in ipairs(self.tilelist) do
-        local x,y = g.getOrigin(self,v)
-        if v.obj then
-            lg.setColor(objColor)
-        elseif v.walkable then
-            lg.setColor(walkableColor)
-        elseif v.active then
-            lg.setColor(cellColor)
-        else
-            lg.setColor(0,0,0)
+        if v.active then
+            local x,y = g.getOrigin(self,v)
+            if v.obj then
+                lg.setColor(objColor)
+            elseif v.walkable then
+                lg.setColor(walkableColor)
+            elseif v.active then
+                lg.setColor(cellColor)
+            else
+                lg.setColor(0,0,0)
+            end
+            lg.rectangle("fill",x,y,self.ts,self.ts)
+            lg.setColor(gridColor)
+            lg.rectangle("line",x,y,self.ts,self.ts)
         end
-        lg.rectangle("fill",x,y,self.ts,self.ts)
-        lg.setColor(gridColor)
-        lg.rectangle("line",x,y,self.ts,self.ts)
     end
-    lg.setColor(0,255,0)
-    lg.rectangle("line",self.x,self.y,self.w,self.h)
+    --lg.setColor(0,255,0)
+    --lg.rectangle("line",self.x,self.y,self.w,self.h)
 end
 
 function g.drawObjects(self)
@@ -307,6 +309,16 @@ function g.removeEnemyCells(list,unit)
     local result = {}
     for i,v in ipairs(list) do
         if v.obj == nil or v.obj.team == unit.team then
+            table.insert(result,v)
+        end
+    end
+    return result
+end
+
+function g.returnWalkable(list)
+    local result = {}
+    for i,v in ipairs(list) do
+        if v.walkable then
             table.insert(result,v)
         end
     end

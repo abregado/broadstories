@@ -27,13 +27,13 @@ function game.new(map,control)
     if buttonHeight > 72 then buttonHeight = 72 end
     
     local etbut = ibut.new(lg:getWidth()-(buttonHeight*1.5),0,state.ui,img.endturn,true,buttonHeight*1.5,buttonHeight)
-    local sbut = ibut.new(4+(buttonHeight*1.5),0,state.ui,img.cog,true,buttonHeight,buttonHeight)
+    --local sbut = ibut.new(4+(buttonHeight*1.5),0,state.ui,img.cog,true,buttonHeight,buttonHeight)
     local rbut = ibut.new(0,0,state.ui,img.retreat,true,buttonHeight*1.5,buttonHeight)
     rbut.click = function() state:triggerRestart() end
     etbut.click = function() state:startNextPhase() end
     state.ui:addElement(rbut)
     state.ui:addElement(etbut)
-    state.ui:addElement(sbut)
+    --state.ui:addElement(sbut)
     
     
     state.collected = nil
@@ -88,7 +88,8 @@ function game:keypressed(key)
     if inputAccepted then
         if key == "escape" then love.event.quit() 
         elseif key == " " then self:startNextPhase()
-        elseif key == "r" then self:triggerVictory() end
+        --elseif key == "r" then self:triggerVictory() 
+        end
     end
 end
 
@@ -99,12 +100,12 @@ function game:draw()
     lg.setFont(font)
     self.map:draw()
     
-    if not inputAccepted then
+    --[[if not inputAccepted then
         lg.setColor(255,0,0)
         lg.setLineWidth(5)
         lg.rectangle("line",self.map.x-1,self.map.y-1,self.map.w+2,self.map.h+2)
         lg.setLineWidth(1)
-    end
+    end]]
     
     
     
@@ -235,15 +236,16 @@ end
 
 function game:triggerVictory()
     threatLevel = threatLevel + 1
+    levelProg = levelProg + 1
     gs.switch(trans.new({aa.new({trans.newFlyup("VICTORY!"),trans.newUnderbar("You defeated all enemies")})}))
 end
 
 function game:triggerRetreat()
-    gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You don't have enough heroes to win")})}))
+    gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You don't have enough heroes to win",-60,true)})}))
 end
 
 function game:triggerRestart()
-    gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You gave up.")})}))
+    gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You gave up.",-60,true)})}))
 end
 
 function game:checkRetreat()

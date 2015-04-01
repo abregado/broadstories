@@ -56,7 +56,11 @@ img.retreat = lg.newImage('/assets/retreat.png')
 img.cog = lg.newImage('/assets/settings.png')
 
 levels = {}
-levels.demo = require('levels/broadstories_l1')
+levels[1] = require('levels/broadstories_introLevel')
+levels[2] = require('levels/broadstories_archerIntro')
+levels[3] = require('levels/broadstories_MageIntro')
+levels[4] = require('levels/broadstories_l1')
+levels[5] = require('levels/broadstories_l2')
 
 --img.tileset = lg.newImage(levels.demo.tilesets[1].image)
 
@@ -69,6 +73,7 @@ anims.stand = a8.newAnimation(sheet.sample(3,1),1)
 anims.walk = a8.newAnimation(sheet.sample('3-4',1),0.3)
 
 threatLevel = 4
+levelProg = 1
 
 --[[
 #############TODOS###############
@@ -101,11 +106,18 @@ win/lose conditions
 function love.load()
     lg.setDefaultFilter('nearest','nearest')
     gs.registerEvents()
-    gs.switch(importer.import(levels.demo,{10},unitTypes,unitImg))
-
+    buildNextLevel()
 end
 
 function love.quit()
+end
+
+function buildNextLevel()
+    if levels[levelProg] then
+        gs.switch(importer.import(levels[levelProg],{10},unitTypes,unitImg))
+    else
+        gs.switch(game.new())
+    end
 end
 
 
