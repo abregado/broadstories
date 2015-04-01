@@ -88,13 +88,13 @@ function game:keypressed(key)
     if inputAccepted then
         if key == "escape" then love.event.quit() 
         elseif key == " " then self:startNextPhase()
-        --elseif key == "r" then self:triggerVictory() 
+        elseif key == "r" then self:triggerVictory() 
         end
     end
 end
 
 function game:draw()
-    local hoverCell = nill
+    local hoverCell = nil
 
     local mx,my = lm.getPosition()
     lg.setFont(font)
@@ -111,22 +111,37 @@ function game:draw()
     
     if inputAccepted then
         if self.collected then
-            self.collected:draw(mx,my,true)
-            local ox,oy = grid.getCenter(self.map,self.collected.cell)
-            lg.line(mx,my,ox,oy)
             for i,v in ipairs(self.collected.moves) do
-                lg.setColor(0,0,255,90)
-                local x,y = grid.getOrigin(self.map,v)
-                lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
+                lg.setColor(125,125,255)
+                local x,y = grid.getCenter(self.map,v)
+                lg.circle("fill",x,y,self.map.ts*0.4,20)
+                lg.setColor(30,30,255)
+                lg.circle("line",x,y,self.map.ts*0.4,20)
             end
+            
+            local ox,oy = grid.getCenter(self.map,self.collected.cell)
             hoverCell = grid.findTileAtCoord(self.map,mx,my)
-            if hoverCell then
+            local hx,hy = grid.getCenter(self.map,hoverCell)
+            
+            
+            
+            if hoverCell and grid.checkCellInList(hoverCell,self.collected.moves) then
                 local attackArea = grid.displaceList(self.map,self.collected.attackShape,hoverCell.pos.x,hoverCell.pos.y)
                 for i,v in ipairs(attackArea) do
-                        lg.setColor(255,0,0,30)
-                        local x,y = grid.getOrigin(self.map,v)
-                        lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
+                        lg.setColor(200,30,30)
+                        local x,y = grid.getCenter(self.map,v)
+                        local barwidth = self.map.ts*0.3
+                        local barOff = barwidth/2
+                        lg.rectangle("fill",x-barOff,y-barOff,barwidth,barwidth)
                 end
+            end
+            
+            if grid.checkCellInList(hoverCell,self.collected.moves) then
+                lg.setColor(30,30,255)
+                lg.setLineWidth(8)
+                lg.line(hx,hy,ox,oy)
+                self.collected:draw(hx,hy,false)
+                lg.setLineWidth(1)
             end
         else
             hoverCell = grid.findTileAtCoord(self.map,mx,my)
@@ -135,9 +150,12 @@ function game:draw()
                 local ox,oy = grid.getCenter(self.map,hoverCell.obj.cell)
                 lg.line(mx,my,ox,oy)
                 for i,v in ipairs(hoverCell.obj.moves) do
-                    lg.setColor(0,0,255,30)
-                    local x,y = grid.getOrigin(self.map,v)
-                    lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
+                    lg.setColor(125,125,255)
+                    local x,y = grid.getCenter(self.map,v)
+                    --lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
+                    lg.circle("fill",x,y,self.map.ts*0.4,20)
+                    lg.setColor(30,30,255)
+                    lg.circle("line",x,y,self.map.ts*0.4,20)
                 end
             
                 local attackArea = grid.displaceList(self.map,hoverCell.obj.attackShape,hoverCell.pos.x,hoverCell.pos.y)
@@ -146,13 +164,13 @@ function game:draw()
                         local x,y = grid.getOrigin(self.map,v)
                         lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
                 end
-                hoverCell.obj:draw(nil,nil,true)
+                --hoverCell.obj:draw(nil,nil,true)
             end
         end
     
     end
     
-    self.control:draw()
+    self.control:draw(hoverCell)
     
     tut.draw()
     lg.print(threatLevel,0,lg:getHeight()-10)

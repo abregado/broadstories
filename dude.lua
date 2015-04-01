@@ -158,30 +158,21 @@ end
 
 function d.draw(self,x,y,showStats)
     --x and y parameters are optional. omitting them will draw the object at its exact location
-    local px,py = self.x,self.y
+    local px,py = x or self.x,y or self.y
     local r = self.map.ts/2.5
     local offset = (self.map.ts/2)
     local scale = self.map.ts/self.control.spriteList[self.img]:getHeight()*0.75
-    
-    --lg.setColor(self.color)
+
     lg.setColor(0,0,0,125)
-    lg.circle("fill",x or px,y or py,r/scale,20)
-    --lg.setColor(0,0,0)
-    --lg.circle("line",x or px,y or py,r/scale,20)
+    lg.circle("fill",px,py,r/scale,20)
     lg.setColor(255,255,255)
     local aoff = self.control.spriteList[self.img]:getHeight()/2*scale
     if self.moved then
-        anims.stand:draw(self.control.spriteList[self.img],x or px-aoff,y or py-(aoff*1.8),0,scale,scale)
+        anims.stand:draw(self.control.spriteList[self.img],px-aoff,py-(aoff*1.8),0,scale,scale)
     else
-        anims.walk:draw(self.control.spriteList[self.img],x or px-aoff,y or py-(aoff*1.8),0,scale,scale)
+        anims.walk:draw(self.control.spriteList[self.img],px-aoff,py-(aoff*1.8),0,scale,scale)
     end
-    
-    --[[if self.attacking and not x and not y then
-        --draw attacking marker
-        lg.setColor(255,255,255)
-        lg.draw(img.attack,px-aoff,py-(aoff*3.6),0,scale,scale)
-    end]]
-    
+
     if self.damage > 0 and self.npc and inputAccepted then
         d.drawHits(self)
     end

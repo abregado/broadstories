@@ -44,11 +44,15 @@ function pd.addToRegister(self,unit,force)
     end
 end
 
-function pd.draw(self)
+function pd.draw(self,hoverCell)
     
     
     for i,v in ipairs(self.units) do
-        v:draw()
+        if v.cell == hoverCell then
+            v:draw(nil,nil,true)
+        else
+            v:draw()
+        end
     end
     
     if self.animRegister[1] and self.animRegister[1].isAnim then

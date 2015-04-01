@@ -438,7 +438,7 @@ function g.getGridDims(w,h)
 
     --calculate space available for map
     local s = {w=lg:getWidth(),h=lg:getHeight()*(1-uibarsize)}
-    local tw = 48
+    local tw = 64
     
     --if not enough space exists, shrink the tiles
     while s.w/tw < w or s.h/tw < h do
