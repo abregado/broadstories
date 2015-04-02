@@ -294,4 +294,34 @@ function d.pickClosestAttack(self)
     return nil
 end
 
+function d.pickMostCombos(self)
+    local results = {}
+    local topY = 99
+    for i,moveOption in ipairs(self.moves) do
+        local attackSquares = grid.displaceList(self.control.map,self.attackShape,moveOption.pos.x,moveOption.pos.y)
+        local count = 0
+        for index,square in ipairs(attackSquares) do
+            if square.obj and square.obj.team == PLAYERTEAM then
+                print(square.obj.class)
+                count = count +1
+            end
+            if square.pos.y < topY then topY = square.pos.y end
+        end
+        print("counting moveOption",i," out of ",#self.moves,":",count,"targets out of",#attackSquares,"squares")
+        table.insert(results,{cell=moveOption,count=count})
+    end
+    
+    print("top y value of attackshape",topY)
+    
+    local topCount = {cell=nil,count = 0}
+    for i,v in ipairs(results) do
+        if v.count > topCount.count then
+            topCount = {cell=v.cell,count = v.count}
+        end
+        
+    end
+    return topCount.cell
+            
+end
+
 return d

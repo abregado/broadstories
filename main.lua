@@ -1,4 +1,4 @@
-DEBUG_MODE = false
+DEBUG_MODE = true
 if DEBUG_MODE then require ('lovedebug') end
 gs = require('hump-master/gamestate') 
 
@@ -39,6 +39,7 @@ unitImg[10] = lg.newImage('/assets/thf4.png')
 unitImg[11] = lg.newImage('/assets/npc6.png') --goatlord
 unitImg[12] = lg.newImage('/assets/npc5.png') --warlock
 unitImg[13] = lg.newImage('/assets/dvl1.png') --demon
+unitImg[14] = lg.newImage('/assets/wmn1.png') --pyromancer
 
 
 
@@ -72,7 +73,7 @@ anims = {}
 anims.stand = a8.newAnimation(sheet.sample(3,1),1)
 anims.walk = a8.newAnimation(sheet.sample('3-4',1),0.3)
 
-threatLevel = 4
+threatLevel = 1
 levelProg = 1
 
 --[[

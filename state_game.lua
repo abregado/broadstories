@@ -121,7 +121,7 @@ function game:draw()
             
             local ox,oy = grid.getCenter(self.map,self.collected.cell)
             hoverCell = grid.findTileAtCoord(self.map,mx,my)
-            local hx,hy = grid.getCenter(self.map,hoverCell)
+            local hx,hy = grid.getCenter(self.map,hoverCell) -- posible that hovercell is not set
             
             
             

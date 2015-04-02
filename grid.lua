@@ -148,7 +148,9 @@ function g.findTileAtCoord(self,x,y)
 end
 
 function g.getCenter(self,tile)
-    return ((tile.pos.x+0.5)*self.ts)+self.x, ((tile.pos.y+0.5)*self.ts)+self.y
+    local x = tile.pos.x or 1
+    local y = tile.pos.y or 1
+    return ((x+0.5)*self.ts)+self.x, ((y+0.5)*self.ts)+self.y
 end
 
 function g.getOrigin(self,tile)

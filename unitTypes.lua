@@ -82,7 +82,7 @@ return {
             armor = 2,
             str = 1,
             },
-        cost = 4,
+        cost = 2,
         weight = 1,
         ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
     },
@@ -112,7 +112,7 @@ return {
             armor = 1,
             str = 1,
             },
-        cost = 1,
+        cost = 4,
         weight = 2,
         ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
     },
@@ -127,7 +127,7 @@ return {
             armor = 2,
             str = 1,
             },
-        cost = 1,
+        cost = 3,
         weight = 5,
         ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
     },
@@ -142,7 +142,7 @@ return {
             armor = 2,
             str = 1,
             },
-        cost = 1,
+        cost = 2,
         weight = 10,
         ai = function(self) return d.pickClosestAttack(self) or d.moveTowardEnemy(self) end
     },
@@ -160,5 +160,30 @@ return {
         cost = 1,
         weight = 0,
         ai = function(self) return nil end
+    },
+    {
+        class="Pyromancer",
+        moveShape = function() return grid.newStar(1) end,
+        attackShape = function() return grid.newShapeFromGrid({
+            {0,0,0,0,1,0,0,0,0},
+            {0,0,0,1,0,1,0,0,0},
+            {0,0,1,0,1,0,1,0,0},
+            {0,1,0,1,0,1,0,1,0},
+            {1,0,1,0,0,0,1,0,1},
+            {0,1,0,1,0,1,0,1,0},
+            {0,0,1,0,1,0,1,0,0},
+            {0,0,0,1,0,1,0,0,0},
+            {0,0,0,0,1,0,0,0,0}
+            }) end,
+        img = 14,
+        color = {125,200,125},
+        stats = {
+            hp = 3,
+            armor = 2,
+            str = 1,
+            },
+        cost = 5,
+        weight = 2,
+        ai = function(self) return d.pickMostCombos(self) or d.moveTowardEnemy(self) end
     }
 }
