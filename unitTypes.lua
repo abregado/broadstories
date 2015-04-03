@@ -89,7 +89,7 @@ return {
             },
         cost = 2,
         weight = 1,
-        ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
+        ai = function(self,targets) return d.pickMostCombos(self,targets) or d.moveTowardEnemy(self,targets) end
     },
     {
         class="Goatlord",
@@ -105,7 +105,7 @@ return {
             },
         cost = 4,
         weight = 1,
-        ai = function(self) return d.pickClosestAttack(self) or d.moveTowardEnemy(self) end
+        ai = function(self,targets) return d.pickMostCombos(self,targets) or d.moveTowardEnemy(self,targets) end
     },
     {
         class="Demon",
@@ -120,8 +120,8 @@ return {
             str = 1,
             },
         cost = 4,
-        weight = 2,
-        ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
+        weight = 5,
+        ai = function(self,targets) return d.moveTowardWeakestEnemy(self,targets) end
     },
     {
         class="Archer",
@@ -137,7 +137,7 @@ return {
             },
         cost = 3,
         weight = 5,
-        ai = function(self) return d.pickFurthestAttack(self) or d.moveTowardEnemy(self) end
+        ai = function(self,targets) return d.pickFurthestAttack(self,targets) or d.moveTowardEnemy(self,targets) end
     },
     {
         class="Thief",
@@ -153,7 +153,7 @@ return {
             },
         cost = 2,
         weight = 10,
-        ai = function(self) return d.pickClosestAttack(self) or d.moveTowardEnemy(self) end
+        ai = function(self,targets) return d.moveTowardEnemy(self,targets) end
     },
     {
         class="TutorialBoy",
@@ -195,6 +195,6 @@ return {
             },
         cost = 5,
         weight = 2,
-        ai = function(self) return d.pickMostCombos(self) or d.moveTowardEnemy(self) end
+        ai = function(self,targets) return d.pickMostCombos(self,targets) or d.moveTowardEnemy(self,targets) end
     }
 }

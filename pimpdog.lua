@@ -124,9 +124,18 @@ function pd.placeUnit(self,cell,unit)
 end
 
 function pd.doTeamAI(self,team)
+    local targetList = {}
+    local teamDamage = pd.countTeamMembers(self,team)
+    print("teamDamge",teamDamage)
+    for i,v in ipairs(self.units) do
+        if v.team == PLAYERTEAM and (v.stats.armor <= teamDamage) then
+            table.insert(targetList,v)
+        end
+    end
+    
     for i,v in ipairs(self.units) do
         if v.npc and v.team == team then
-            local tcell = v:ai()
+            local tcell = v:ai(targetList)
             if tcell then
                 pd.moveUnit(self,v,tcell)
             end
@@ -281,6 +290,19 @@ function pd.findClosestEnemy(self,unit,x,y)
     for i,v in ipairs(self.units) do
         local dist = vl.dist(x,y,v.cell.pos.x,v.cell.pos.y)
         if dist < d and not (v == unit) and not (v.team == unit.team) then
+            d = dist
+            result = v
+        end
+    end
+    return result
+end
+
+function pd.findClosestEnemyFromList(self,unit,x,y,targets)
+    local result = nil
+    local d = 999999999999
+    for i,v in ipairs(self.units) do
+        local dist = vl.dist(x,y,v.cell.pos.x,v.cell.pos.y)
+        if dist < d and dude.unitIsInList(v,targets) then
             d = dist
             result = v
         end

@@ -272,6 +272,28 @@ function d.moveTowardEnemy(self)
     return nil
 end
 
+function d.moveTowardWeakestEnemy(self,targets)
+    local tcell
+    local target = nil
+    local lowArmor = 10
+    for i,v in ipairs(targets) do
+        if v.stats.armor < lowArmor then
+            target = v
+            lowArmor = v.stats.armor
+        end
+    end
+    print(target.class or "No Target Found",#targets,"targets given")
+    
+    if target then
+        local options = grid.displaceList(self.map,self.moveShape,self.cell.pos.x,self.cell.pos.y)
+        options = grid.removeFullCells(options)
+        tcell = grid.getClosestFromList(options,target.cell.pos.x,target.cell.pos.y)
+
+        return tcell or nil
+    end
+    return nil
+end
+
 function d.avoidEnemy(self)
     local tcell
     local target = pimp.findClosestEnemy(self.control,self,self.cell.pos.x,self.cell.pos.y)
@@ -300,7 +322,16 @@ function d.pickFurthestAttack(self)
     return nil
 end
 
-function d.pickClosestAttack(self)
+function d.pickClosestAttack(self,targets)
+    local target = pimp.findClosestEnemyFromList(self.control,self,self.cell.pos.x,self.cell.pos.y,targets)
+    if target then
+        local attackSquares = pimp.findAttackSquares(self.control,self)
+        return grid.getClosestFromList(attackSquares,target.cell.pos.x,target.cell.pos.y)
+    end
+    return nil
+end
+
+function d.pickClosestAttackFromAll(self)
     local target = pimp.findClosestEnemy(self.control,self,self.cell.pos.x,self.cell.pos.y)
     if target then
         local attackSquares = pimp.findAttackSquares(self.control,self)
@@ -309,7 +340,7 @@ function d.pickClosestAttack(self)
     return nil
 end
 
-function d.pickMostCombos(self)
+function d.pickMostCombosFromAll(self)
     local results = {}
     local topY = 99
     for i,moveOption in ipairs(self.moves) do
@@ -327,6 +358,44 @@ function d.pickMostCombos(self)
     end
     
     print("top y value of attackshape",topY)
+    
+    local topCount = {cell=nil,count = 0}
+    for i,v in ipairs(results) do
+        if v.count > topCount.count then
+            topCount = {cell=v.cell,count = v.count}
+        end
+        
+    end
+    return topCount.cell
+            
+end
+
+function d.unitIsInList(unit,list)
+    for i,v in ipairs(list) do
+        if v==unit then
+            return true
+        end
+    end
+    return false
+end
+
+function d.pickMostCombos(self,targets)
+    local results = {}
+    local topY = 99
+    print("pick most combos",#targets,"targets given")
+    for i,moveOption in ipairs(self.moves) do
+        local attackSquares = grid.displaceList(self.control.map,self.attackShape,moveOption.pos.x,moveOption.pos.y)
+        local count = 0
+        for index,square in ipairs(attackSquares) do
+            if square.obj and d.unitIsInList(square.obj,targets) then
+                print(square.obj.class)
+                count = count +1
+            end
+            if square.pos.y < topY then topY = square.pos.y end
+        end
+        print("counting moveOption",i," out of ",#self.moves,":",count,"targets out of",#attackSquares,"squares")
+        table.insert(results,{cell=moveOption,count=count})
+    end
     
     local topCount = {cell=nil,count = 0}
     for i,v in ipairs(results) do
