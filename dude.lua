@@ -174,7 +174,7 @@ function d.draw(self,x,y,showStats)
     end
 
     if self.damage > 0 and self.npc and inputAccepted then
-        d.drawHits(self)
+        --d.drawHits(self)
     end
     if showStats then
         d.drawHealth(self)
@@ -190,8 +190,8 @@ function d.drawHits(self)
     local sIcon = img.shield
     local dIcon = img.hit
     
-    local idealWidth = self.map.ts/2
-    local margin = self.map.ts/6
+    local idealWidth = self.map.ts/1.5
+    local margin = self.map.ts/2
     local scale = idealWidth/sIcon:getWidth()
     
     local iw,ih = sIcon:getWidth()*scale,sIcon:getHeight()*scale
@@ -214,7 +214,7 @@ function d.drawHealth(self)
     
     local hIcon = img.heart
     
-    local idealWidth = self.map.ts/4
+    local idealWidth = self.map.ts/2
     local scale = idealWidth/hIcon:getWidth()
     
     local iw,ih = hIcon:getWidth()*scale,hIcon:getHeight()*scale
@@ -231,16 +231,22 @@ function d.drawArmor(self)
     local by = py + self.map.ts/2
     
     
-    local hIcon = img.shield
+    local dIcon = img.hit
+    local sIcon = img.shield
     
-    local idealWidth = self.map.ts/4
-    local scale = idealWidth/hIcon:getWidth()
+    local idealWidth = self.map.ts/2
+    local margin = self.map.ts/2
+    local scale = idealWidth/dIcon:getWidth()
     
-    local iw,ih = hIcon:getWidth()*scale,hIcon:getHeight()*scale
+    local iw,ih = dIcon:getWidth()*scale,dIcon:getHeight()*scale
     local two = iw*self.stats.armor/2
     
-    for i=1,self.stats.armor do
-        lg.draw(hIcon,px+((i-1)*iw)-two,by-ih,0,scale,scale)
+    for i=self.stats.armor,1,-1 do
+        if i <= self.damage then
+            lg.draw(dIcon,px+((i-1)*margin)-two,by-ih,0,scale,scale)
+        else
+            lg.draw(sIcon,px+((i-1)*margin)-two,by-ih,0,scale,scale)
+        end
     end
 end
 

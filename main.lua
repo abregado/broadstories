@@ -56,6 +56,8 @@ img.hit = lg.newImage('/assets/icon_82.png')
 img.endturn = lg.newImage('/assets/endturn.png')
 img.retreat = lg.newImage('/assets/retreat.png')
 img.cog = lg.newImage('/assets/settings.png')
+img.flag = lg.newImage('/assets/flag2.png')
+img.book = lg.newImage('/assets/book.png')
 
 levels = {}
 levels[1] = require('levels/broadstories_introLevel')

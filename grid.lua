@@ -107,7 +107,7 @@ function g.draw(self)
             end
             lg.rectangle("fill",x,y,self.ts,self.ts)
             lg.setColor(gridColor)
-            lg.rectangle("line",x,y,self.ts,self.ts)
+            --lg.rectangle("line",x,y,self.ts,self.ts)
         end
     end
     --lg.setColor(0,255,0)

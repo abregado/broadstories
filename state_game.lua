@@ -4,7 +4,7 @@ local font = lg.newFont()
 
 inputAccepted = true
 
-function game.new(map,control)
+function game.new(map,control,tutorial)
     local state = {}
     
     if map then
@@ -27,14 +27,17 @@ function game.new(map,control)
     if buttonHeight > 72 then buttonHeight = 72 end
     
     local etbut = ibut.new(lg:getWidth()-(buttonHeight*1.5),0,state.ui,img.endturn,true,buttonHeight*1.5,buttonHeight)
-    --local sbut = ibut.new(4+(buttonHeight*1.5),0,state.ui,img.cog,true,buttonHeight,buttonHeight)
-    local rbut = ibut.new(0,0,state.ui,img.retreat,true,buttonHeight*1.5,buttonHeight)
+    local sbut = ibut.new(4+(buttonHeight*1.5),0,state.ui,img.book,true,buttonHeight*1.5,buttonHeight)
+    local rbut = ibut.new(0,0,state.ui,img.flag,true,buttonHeight*1.5,buttonHeight)
     rbut.click = function() state:triggerRestart() end
     etbut.click = function() state:startNextPhase() end
+    sbut.click = function() state:triggerSkip() end
     state.ui:addElement(rbut)
     state.ui:addElement(etbut)
-    --state.ui:addElement(sbut)
     
+    if control and map then 
+    state.ui:addElement(sbut)
+    end
     
     state.collected = nil
     
@@ -50,6 +53,7 @@ function game.new(map,control)
     state.checkRetreat = game.checkRetreat
     state.triggerRetreat = game.triggerRetreat
     state.triggerRestart = game.triggerRestart
+    state.triggerSkip = game.triggerSkip
     
     if not control then
         lgen.generate(state.control,4,threatLevel)
@@ -242,6 +246,12 @@ end
 
 function game:triggerRestart()
     gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You gave up.",-60,true)})}))
+end
+
+function game:triggerSkip()
+    levelProg = levelProg + 1
+    threatLevel = threatLevel + 1
+    gs.switch(trans.new({aa.new({trans.newFlyup("Level Skipped"),trans.newUnderbar("You didn't need that tutorial anyway.",-60)})}))
 end
 
 function game:checkRetreat()

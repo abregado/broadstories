@@ -148,8 +148,8 @@ return {
     },
     {
         class="TutorialBoy",
-        moveShape = function() return grid.newBox(1) end,
-        attackShape = function() return grid.newBox(1) end,
+        moveShape = function() return grid.newCross(1) end,
+        attackShape = function() return grid.newBox(0) end,
         img = 2,
         color = {125,200,125},
         stats = {
@@ -159,7 +159,7 @@ return {
             },
         cost = 1,
         weight = 0,
-        ai = function(self) return nil end
+        ai = function(self) return d.avoidEnemy(self) end
     },
     {
         class="Pyromancer",
