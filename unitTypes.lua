@@ -4,6 +4,7 @@ return {
         moveShape = function() return grid.newCircle(2) end,
         attackShape = function() return grid.newCross(1) end,
         img = 3,
+        attackImg = 5,
         color = {100,100,255},
         hero = true,
         stats = {
@@ -20,6 +21,7 @@ return {
         moveShape = function() return grid.newBox(1) end,
         attackShape = function() return grid.findCompliment(grid.newStar(10),grid.newStar(1)) end,
         img = 4,
+        attackImg = 4,
         color = {203,178,151},
         hero = true,
         stats = {
@@ -36,6 +38,7 @@ return {
         moveShape = function() return grid.newBox(1) end,
         attackShape = function() return grid.findCompliment(grid.newCross(10),grid.newCross(2)) end,
         img = 5,
+        attackImg = 8,
         color = {192,20,169},
         hero = true,
         stats = {
@@ -60,6 +63,7 @@ return {
             {0,0,0,0,0,0,0}
             }) end,
         img = 6,
+        attackImg = 2,
         color = {86,188,109},
         hero = true,
         stats = {
@@ -76,6 +80,7 @@ return {
         moveShape = function() return grid.newBox(1) end,
         attackShape = function() return grid.newCross(10) end,
         img = 12,
+        attackImg = 3,
         color = {125,200,125},
         stats = {
             hp = 2,
@@ -91,6 +96,7 @@ return {
         moveShape = function() return grid.newStar(2) end,
         attackShape = function() return grid.newBox(1) end,
         img = 11,
+        attackImg = 5,
         color = {125,200,125},
         stats = {
             hp = 3,
@@ -106,6 +112,7 @@ return {
         moveShape = function() return grid.newCircle(4) end,
         attackShape = function() return grid.newCross(1) end,
         img = 13,
+        attackImg = 9,
         color = {125,200,125},
         stats = {
             hp = 5,
@@ -121,6 +128,7 @@ return {
         moveShape = function() return grid.newBox(1) end,
         attackShape = function() return grid.newRing(4,5) end,
         img = 8,
+        attackImg = 4,
         color = {125,200,125},
         stats = {
             hp = 2,
@@ -136,6 +144,7 @@ return {
         moveShape = function() return grid.newCross(2) end,
         attackShape = function() return grid.newCross(1) end,
         img = 7,
+        attackImg = 1,
         color = {125,200,125},
         stats = {
             hp = 2,
@@ -151,6 +160,7 @@ return {
         moveShape = function() return grid.newCross(1) end,
         attackShape = function() return grid.newBox(0) end,
         img = 2,
+        attackImg = 1,
         color = {125,200,125},
         stats = {
             hp = 3,
@@ -176,6 +186,7 @@ return {
             {0,0,0,0,1,0,0,0,0}
             }) end,
         img = 14,
+        attackImg = 8,
         color = {125,200,125},
         stats = {
             hp = 3,

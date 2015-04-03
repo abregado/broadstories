@@ -21,6 +21,7 @@ function d.new(controller,class,team)
     o.moved = true
     
     o.attackShape = grid.newCross(1)
+    o.attackImg = 1
     o.attacking = false
     
     
@@ -98,9 +99,9 @@ function d.hurt(self)
     
 end
 
-function d.kill(self)
+function d.kill(self,skipAnim)
     self.isDead = true
-    self.control:addToRegister(aa.new({d.newDeathAnim(self)}))
+    if not skipAnim then self.control:addToRegister(aa.new({d.newDeathAnim(self)})) end
     self.img = 1
 end
 
@@ -113,6 +114,7 @@ function d.setClass(o,class)
         o.attackShape = classData.attackShape()
         o.img = tonumber(classData.img)
         o.color = classData.color
+        o.attackImg = classData.attackImg
         o.stats.hp = tonumber(classData.stats.hp)
         o.stats.armor = tonumber(classData.stats.armor)
         o.stats.str = tonumber(classData.stats.str)
@@ -163,6 +165,14 @@ function d.draw(self,x,y,showStats)
     local offset = (self.map.ts/2)
     local scale = self.map.ts/self.control.spriteList[self.img]:getHeight()*0.75
 
+    if self.isDead == false and self.npc == true then
+        if self.damage >= self.stats.armor then
+            sd.drawDangerCircle(self.control.map,self.cell,{200, 30, 30})
+        elseif self.damage > 0 then
+            sd.drawDangerCircle(self.control.map,self.cell,{255, 238, 0})
+        end
+    end
+
     lg.setColor(0,0,0,125)
     lg.circle("fill",px,py,r/scale,20)
     lg.setColor(255,255,255)
@@ -172,13 +182,12 @@ function d.draw(self,x,y,showStats)
     else
         anims.walk:draw(self.control.spriteList[self.img],px-aoff,py-(aoff*1.8),0,scale,scale)
     end
-
-    if self.damage > 0 and self.npc and inputAccepted then
-        --d.drawHits(self)
-    end
-    if showStats then
-        d.drawHealth(self)
-        d.drawArmor(self)
+    
+    if self.isDead == false then
+        if showStats then
+            d.drawHealth(self)
+            d.drawArmor(self)
+        end
     end
 end
 
@@ -190,7 +199,7 @@ function d.drawHits(self)
     local sIcon = img.shield
     local dIcon = img.hit
     
-    local idealWidth = self.map.ts/1.5
+    local idealWidth = self.map.ts/1.2
     local margin = self.map.ts/2
     local scale = idealWidth/sIcon:getWidth()
     
@@ -214,14 +223,14 @@ function d.drawHealth(self)
     
     local hIcon = img.heart
     
-    local idealWidth = self.map.ts/2
+    local idealWidth = self.map.ts/3
     local scale = idealWidth/hIcon:getWidth()
     
     local iw,ih = hIcon:getWidth()*scale,hIcon:getHeight()*scale
     local two = iw*self.stats.hp/2
     
     for i=1,self.stats.hp do
-        lg.draw(hIcon,px+((i-1)*iw)-two,by-ih-ih,0,scale,scale)
+        lg.draw(hIcon,px+((i-1)*iw)-two,by-ih-ih-ih,0,scale,scale)
     end
 end
 

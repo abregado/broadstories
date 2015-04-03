@@ -1,4 +1,4 @@
-DEBUG_MODE = false
+DEBUG_MODE = true
 if DEBUG_MODE then require ('lovedebug') end
 gs = require('hump-master/gamestate') 
 
@@ -42,7 +42,17 @@ unitImg[12] = lg.newImage('/assets/npc5.png') --warlock
 unitImg[13] = lg.newImage('/assets/dvl1.png') --demon
 unitImg[14] = lg.newImage('/assets/wmn1.png') --pyromancer
 
-
+attackImg = {}
+attackImg[1] = lg.newImage('assets/icon_78.png') --thrown dagger
+attackImg[2] = lg.newImage('assets/icon_94.png') --ice spear
+attackImg[3] = lg.newImage('assets/icon_95.png') --fire spear
+attackImg[4] = lg.newImage('assets/icon_93.png') --arrow
+attackImg[5] = lg.newImage('assets/icon_100.png') --sword
+attackImg[6] = lg.newImage('assets/icon_101.png') --bow
+attackImg[7] = lg.newImage('assets/icon_61.png') --magic
+attackImg[8] = lg.newImage('assets/fireball.png') --fireball
+attackImg[9] = lg.newImage('assets/firespear.png') --firespear
+attackImg[10] = lg.newImage('assets/icon_08.png') --staff
 
 img = {}
 img.heart = lg.newImage('/assets/heart_0.png')
@@ -58,6 +68,7 @@ img.retreat = lg.newImage('/assets/retreat.png')
 img.cog = lg.newImage('/assets/settings.png')
 img.flag = lg.newImage('/assets/flag2.png')
 img.book = lg.newImage('/assets/book.png')
+
 
 levels = {}
 levels[1] = require('levels/broadstories_introLevel')

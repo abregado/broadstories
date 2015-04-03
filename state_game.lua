@@ -93,7 +93,8 @@ function game:keypressed(key)
     if inputAccepted then
         if key == "escape" then love.event.quit() 
         elseif key == " " then self:startNextPhase()
-        elseif key == "r" then self:triggerVictory() 
+        elseif key == "r" and DEBUG_MODE then self:triggerVictory() 
+        elseif key == "k" and DEBUG_MODE then pimp.killTeam(self.control,2) 
         end
     end
 end
@@ -140,7 +141,7 @@ function game:draw()
         else
             hoverCell = grid.findTileAtCoord(self.map,mx,my)
             
-            if hoverCell and hoverCell.obj then
+            if hoverCell and hoverCell.obj and hoverCell.obj.isDead == false then
                 local ox,oy = grid.getCenter(self.map,hoverCell.obj.cell)
                 lg.line(mx,my,ox,oy) -- draw a line to 
                 
@@ -162,43 +163,49 @@ function game:draw()
 end
 
 function game:startNextPhase()
-    if self.phase == 0 then --end of player movement phase
-        --check for Retreat or Defeat
-        self:checkRetreat()
-        --calculate list of damaged targets
-        local victims = pimp.calculateAttackers(self.control,1)
-        local injuries = pimp.calculateInjured(victims)
-        --build list of attack and damage animations (animation,target pairs)
-        pimp.addInjuryPairs(self.control,injuries)
-        print("Starting phase 1: victims = "..#victims..", injuries = "..#injuries)
-        --set next phase
-        self.phase = 1
-        inputAccepted = false
-    elseif self.phase == 1 then --end of player attack phase
-        --clean up dead guys
-        pimp.cleanDead(self.control)
-        --check for victory
-        self:checkVictory()
-        --calculate enemy movement
-        pimp.updateTeamMoves(self.control,2)
-        pimp.doTeamAI(self.control,2)
-        self.phase = 2
-    elseif self.phase == 2 then -- end of npc movement phase
-        --calculate damage against team 1
-        local victims = pimp.calculateAttackers(self.control,2)
-        local injuries = pimp.calculateInjured(victims)
-        pimp.addInjuryPairs(self.control,injuries)
-        print("Starting phase 3: victims = "..#victims..", injuries = "..#injuries)
-        self.phase = 3
-    elseif self.phase == 3 then --end of npc attack phase
-        --clean up dead heroes
-        pimp.cleanDead(self.control)
-        --calculate hero movement
-        pimp.updateTeamMoves(self.control,1)
-        pimp.updateTeamMoves(self.control,2)
-        pimp.checkDamage(self.control)
-        self.phase = 0
-        inputAccepted = true
+    if self.collected == nil then
+        if self.phase == 0 then --end of player movement phase
+            --check for Retreat or Defeat
+            self:checkRetreat()
+            --calculate list of damaged targets
+            local victims = pimp.calculateAttackers(self.control,1)
+            local injuries = pimp.calculateInjured(victims)
+            --build list of attack and damage animations (animation,target pairs)
+            pimp.addInjuryPairs(self.control,injuries)
+            print("Starting phase 1: victims = "..#victims..", injuries = "..#injuries)
+            --clean up dead guys
+            pimp.cleanDead(self.control)
+            --set next phase
+            self.phase = 1
+            inputAccepted = false
+        elseif self.phase == 1 then --end of player attack phase
+            --clean up dead guys
+            pimp.cleanDead(self.control)
+            --calculate enemy movement
+            pimp.updateTeamMoves(self.control,2)
+            pimp.doTeamAI(self.control,2)
+            self.phase = 2
+        elseif self.phase == 2 then -- end of npc movement phase
+            --calculate damage against team 1
+            local victims = pimp.calculateAttackers(self.control,2)
+            local injuries = pimp.calculateInjured(victims)
+            pimp.addInjuryPairs(self.control,injuries)
+            print("Starting phase 3: victims = "..#victims..", injuries = "..#injuries)
+            --clean up dead guys
+            pimp.cleanDead(self.control)
+            self.phase = 3
+        elseif self.phase == 3 then --end of npc attack phase
+            --clean up dead heroes
+            pimp.cleanDead(self.control)
+            --calculate hero movement
+            pimp.updateTeamMoves(self.control,1)
+            pimp.updateTeamMoves(self.control,2)
+            pimp.checkDamage(self.control)
+            --check for victory
+            self:checkVictory()
+            self.phase = 0
+            inputAccepted = true
+        end
     end
 end
 
@@ -206,29 +213,11 @@ function game:update(dt)
     tut.update(dt)
     anims.stand:update(dt)
     anims.walk:update(dt)
-    
-    if self.phase == 0 then
-        local complete = self.control:update(dt)
-        --wait for player end turn command 
-    elseif self.phase == 1 then
-        --work through attack animations list
-        --deal damage as each animation finishes
-        --splice death animations
-        local complete = self.control:update(dt)
-        --trigger nextPhase when done
-        if complete then self:startNextPhase() end
-    elseif self.phase == 2 then
-        --work through enemy movement (just team 2 for now)
-        local complete = self.control:update(dt)
-        --trigger nextPhase when empty
-        if complete then self:startNextPhase() end
-    elseif self.phase == 3 then
-        --work through attack animations list
-        --deal damage as each animation finishes
-        --splice death animations
-        local complete = self.control:update(dt)
-        --trigger nextPhase when done
-        if complete then self:startNextPhase() end
+
+    local complete = self.control:update(dt)
+    if self.phase > 0 then
+        --autocomplete phase when done
+        if complete then self:startNextPhase() end 
     end
     
     self.ui:update(dt)

@@ -11,7 +11,7 @@ function pd.new(map,unitTypes,spriteList)
     o.animRegister = {}
     o.injuryRegister = {}
     
-    o.endTurn = pd.endTurn
+    o.endTurn = pd.endTurnd
     o.update = pd.update
     o.addUnit = pd.addUnit
     o.draw = pd.draw
@@ -26,6 +26,12 @@ function pd.countTeamMembers(self,team)
         if v.team == team then result = result +1 end
     end
     return result
+end
+
+function pd.killTeam(self,team)
+    for i,v in ipairs(self.units) do
+        if v.team == team then v:kill(true) end
+    end
 end
 
 function pd.countHighestArmorInTeam(self,team)
@@ -128,29 +134,6 @@ function pd.doTeamAI(self,team)
     end
 end
 
-function pd.endTurn(self,dt)
-   --[[    
-    pd.applyDamage(self,1)
-    pd.doTeamAI(self,2)
-    pd.applyDamage(self,2)
-    
-    
-    --remove dead guys
-    for i,v in ipairs(self.units) do
-        if v.isDead then
-            grid.takeObject(self.map,v.cell)
-            table.remove(self.units,i)
-            print("one dude died") 
-        end
-    end
-    
-    for i,v in ipairs(self.units) do
-        v:endTurn(dt)
-    end
-    pd.checkDamage(self)
-    ]]
-end
-
 function pd.updateTeamMoves(self,team)
     for i,v in ipairs(self.units) do
         if v.team == team then v:endTurn(dt) end
@@ -158,14 +141,23 @@ function pd.updateTeamMoves(self,team)
 end
 
 function pd.cleanDead(self)
+    local deadGuys = {}
     --remove dead guys
     for i,v in ipairs(self.units) do
         if v.isDead then
-            grid.takeObject(self.map,v.cell)
-            table.remove(self.units,i)
-            print("one dude died") 
+            table.insert(deadGuys,v) 
         end
     end
+    
+    for i,v in ipairs(deadGuys) do
+        for j,k in ipairs(self.units) do
+            if v == k then
+                grid.takeObject(self.map,v.cell)
+                table.remove(self.units,j)
+            end
+        end
+    end
+                
 end
 
 function pd.checkAttackers(self)
@@ -245,7 +237,7 @@ function pd.addInjuryPairs(self,injured)
     for i,victim in ipairs(injured) do
         local anims = {}
         for j,attacker in ipairs(victim.attackers) do
-            local newAnim = aa.newHitAnim(attacker.x,attacker.y)
+            local newAnim = aa.newIconShootAnim(attacker.x,attacker.y,victim.x,victim.y,attackImg[attacker.attackImg])
             table.insert(anims,newAnim)
         end
         local attackAnim = aa.new(anims)

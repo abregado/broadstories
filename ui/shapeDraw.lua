@@ -36,6 +36,26 @@ function sd.drawAttackOutline(list,map,unit)
     lg.setLineWidth(1)
 end
 
+function sd.drawDangerSquare(map,cell,color)
+    local x,y = grid.getCenter(map,cell)
+    local w = (map.ts)*globTweens.grow.val
+    local ox,oy = w/2,w/2
+    lg.setLineWidth(3)
+    lg.setColor(color[1],color[2],color[3],60)
+    lg.rectangle("line",x-ox,y-oy,w,w)
+    lg.setColor(color[1],color[2],color[3],125)
+    lg.rectangle("fill",x-ox,y-oy,w,w)
+end
+
+function sd.drawDangerCircle(map,cell,color)
+    local x,y = grid.getCenter(map,cell)
+    local w = (map.ts)*globTweens.grow.val*0.6
+    lg.setLineWidth(2)
+    lg.setColor(color)
+    lg.circle("line",x,y,w/2,20)
+    lg.setLineWidth(1)
+end
+
 function sd.drawBarAttackShape(list,map,unit)
     for i,v in ipairs(list) do
         
