@@ -148,13 +148,19 @@ function g.findTileAtCoord(self,x,y)
 end
 
 function g.getCenter(self,tile)
-    local x = tile.pos.x or 1
-    local y = tile.pos.y or 1
-    return ((x+0.5)*self.ts)+self.x, ((y+0.5)*self.ts)+self.y
+    if tile then
+        local x = tile.pos.x or 1
+        local y = tile.pos.y or 1
+        return ((x+0.5)*self.ts)+self.x, ((y+0.5)*self.ts)+self.y
+    end
+    return 0,0
 end
 
 function g.getOrigin(self,tile)
-    return (tile.pos.x*self.ts)+self.x, (tile.pos.y*self.ts)+self.y
+    if tile then
+        return (tile.pos.x*self.ts)+self.x, (tile.pos.y*self.ts)+self.y
+    end
+    return 0,0
 end
 
 function g.stepDistance(self,c1,c2)
@@ -195,6 +201,40 @@ function g.checkCellInList(cell,list)
     for i,v in ipairs(list) do
         if v == cell then
             result = true
+        end
+    end
+    return result
+end
+
+function g.checkPosInList(x,y,list)
+    local result = false
+    for i,v in ipairs(list) do
+        if v.pos.x == x and v.pos.y == y then
+            result = true
+        end
+    end
+    return result
+end
+
+function g.getNeighboursInList(x,y,list)
+    local result = {}
+    for i,v in ipairs(list) do
+        local xdiff = x-v.pos.x
+        local ydiff = y-v.pos.y
+        if (xdiff == 1 and ydiff == 0) or (xdiff == 0 and ydiff == 1) or (xdiff == -1 and ydiff == 0) or(xdiff == 0 and ydiff == -0) then
+            table.insert(result,v)
+        end
+    end
+    return result
+end
+
+function g.getDoubleDiagonallyAdjacent(x,y,list)
+    local result = {}
+    for i,v in ipairs(list) do
+        local xdiff = x-v.pos.x
+        local ydiff = y-v.pos.y
+        if (xdiff == 2 and ydiff == 2) or (xdiff == 2 and ydiff == -2) or (xdiff == -2 and ydiff == 2) or(xdiff == -2 and ydiff == -2) then
+            table.insert(result,v)
         end
     end
     return result
@@ -262,11 +302,11 @@ function g.joinLists(list1,list2)
     return result
 end
 
-function g.displaceList(self,list,x,y,ignoreWalkable)
+function g.displaceList(self,list,x,y,ignoreWalkable,ignoreVoid)
     local result = {}
     for i,v in ipairs(list) do
         local newCell = g.findTileAtPos(self,v.pos.x+x,v.pos.y+y)
-        if newCell and newCell.active and (ignoreWalkable or newCell.walkable) then table.insert(result,newCell) end
+        if newCell and (ignoreWalkable or newCell.walkable) and (ignoreVoid or newCell.active) then table.insert(result,newCell) end
     end
     return result
 end

@@ -62,6 +62,7 @@ function game.new(map,control)
     
     
     
+    
     return state
 end
 
@@ -111,29 +112,18 @@ function game:draw()
     
     if inputAccepted then
         if self.collected then
-            for i,v in ipairs(self.collected.moves) do
-                lg.setColor(125,125,255)
-                local x,y = grid.getCenter(self.map,v)
-                lg.circle("fill",x,y,self.map.ts*0.4,20)
-                lg.setColor(30,30,255)
-                lg.circle("line",x,y,self.map.ts*0.4,20)
-            end
+            sd.drawMoveShape(self.collected.moves,self.map,true) -- draw selected units movement area with jiggle
             
             local ox,oy = grid.getCenter(self.map,self.collected.cell)
             hoverCell = grid.findTileAtCoord(self.map,mx,my)
-            local hx,hy = grid.getCenter(self.map,hoverCell) -- posible that hovercell is not set
+            local hx,hy = grid.getCenter(self.map,hoverCell)
             
             
             
             if hoverCell and grid.checkCellInList(hoverCell,self.collected.moves) then
-                local attackArea = grid.displaceList(self.map,self.collected.attackShape,hoverCell.pos.x,hoverCell.pos.y)
-                for i,v in ipairs(attackArea) do
-                        lg.setColor(200,30,30)
-                        local x,y = grid.getCenter(self.map,v)
-                        local barwidth = self.map.ts*0.3
-                        local barOff = barwidth/2
-                        lg.rectangle("fill",x-barOff,y-barOff,barwidth,barwidth)
-                end
+                
+                local attackArea = grid.displaceList(self.map,self.collected.attackShape,hoverCell.pos.x,hoverCell.pos.y,true,true)
+                sd.drawAttackOutline(attackArea,self.map,self.collected)
             end
             
             if grid.checkCellInList(hoverCell,self.collected.moves) then
@@ -148,23 +138,12 @@ function game:draw()
             
             if hoverCell and hoverCell.obj then
                 local ox,oy = grid.getCenter(self.map,hoverCell.obj.cell)
-                lg.line(mx,my,ox,oy)
-                for i,v in ipairs(hoverCell.obj.moves) do
-                    lg.setColor(125,125,255)
-                    local x,y = grid.getCenter(self.map,v)
-                    --lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
-                    lg.circle("fill",x,y,self.map.ts*0.4,20)
-                    lg.setColor(30,30,255)
-                    lg.circle("line",x,y,self.map.ts*0.4,20)
-                end
+                lg.line(mx,my,ox,oy) -- draw a line to 
+                
+                sd.drawMoveShape(hoverCell.obj.moves,self.map)
             
-                local attackArea = grid.displaceList(self.map,hoverCell.obj.attackShape,hoverCell.pos.x,hoverCell.pos.y)
-                for i,v in ipairs(attackArea) do
-                        lg.setColor(255,0,0,90)
-                        local x,y = grid.getOrigin(self.map,v)
-                        lg.rectangle("fill",x,y,self.map.ts,self.map.ts)
-                end
-                --hoverCell.obj:draw(nil,nil,true)
+                local attackArea = grid.displaceList(self.map,hoverCell.obj.attackShape,hoverCell.pos.x,hoverCell.pos.y,true,true)
+                sd.drawAttackOutline(attackArea,self.map,hoverCell.obj)
             end
         end
     
@@ -175,7 +154,6 @@ function game:draw()
     tut.draw()
     lg.print(threatLevel,0,lg:getHeight()-10)
     self.ui:draw()
-    
     
 end
 

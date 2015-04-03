@@ -1,4 +1,4 @@
-DEBUG_MODE = true
+DEBUG_MODE = false
 if DEBUG_MODE then require ('lovedebug') end
 gs = require('hump-master/gamestate') 
 
@@ -20,6 +20,7 @@ aa = require('attackAnim')
 uicon = require('UIcontroller')
 ibut = require('ui/iconButton')
 importer = require('importer')
+sd = require('ui/shapeDraw')
 
 PLAYERTEAM = 1
 ENEMYTEAM = 2
@@ -108,6 +109,31 @@ function love.load()
     lg.setDefaultFilter('nearest','nearest')
     gs.registerEvents()
     buildNextLevel()
+    
+    --tweening values
+    globTweens = {}
+    globTweens.jiggle = {tween=nil,val=0.8,low=0.8,high=1}
+    globTweens.grow = {tween=nil,val=1,low=1,high=1.2}
+    
+    setupTweens()
+end
+
+function setupTweens()
+    for i,v in pairs(globTweens) do
+        v.val = v.low
+        v.tween = tween.new(0.5,v,{val=v.high},'linear')
+    end
+end
+
+function love.update(dt)
+    for i,v in pairs(globTweens) do
+        local complete = v.tween:update(dt)
+        if complete and v.val == v.low then
+            v.tween = tween.new(0.5,v,{val=v.high},'linear')
+        elseif complete and v.val == v.high then
+            v.tween = tween.new(0.5,v,{val=v.low},'linear')
+        end
+    end
 end
 
 function love.quit()
