@@ -11,6 +11,10 @@ function pd.new(map,unitTypes,spriteList)
     o.animRegister = {}
     o.injuryRegister = {}
     
+    --team AI variables
+    o.turnsSinceDamage = 0
+    o.priorityTarget = nil
+    
     o.endTurn = pd.endTurnd
     o.update = pd.update
     o.addUnit = pd.addUnit
@@ -124,13 +128,25 @@ function pd.placeUnit(self,cell,unit)
 end
 
 function pd.doTeamAI(self,team)
+    self.turnsSinceDamage = self.turnsSinceDamage + 1
+    print("turns since damage",self.turnsSinceDamage)
     local targetList = {}
+    
     local teamDamage = pd.countTeamMembers(self,team)
     print("teamDamge",teamDamage)
     for i,v in ipairs(self.units) do
         if v.team == PLAYERTEAM and (v.stats.armor <= teamDamage) then
             table.insert(targetList,v)
         end
+    end
+    
+    if self.turnsSinceDamage > 4 then        
+        self.priorityTarget = targetList[math.random(1,#targetList)]
+    end
+        
+    if self.priorityTarget then
+        print("priority target:",self.priorityTarget.class)
+        targetList = {self.priorityTarget}
     end
     
     for i,v in ipairs(self.units) do
@@ -237,6 +253,7 @@ function pd.calculateInjured(attacked)
         end
         if hitTotal >= unit.stats.armor then
             table.insert(result,unit)
+            
         end
     end
     return result

@@ -89,7 +89,7 @@ return {
             },
         cost = 2,
         weight = 1,
-        ai = function(self,targets) return d.pickMostCombos(self,targets) or d.moveTowardEnemy(self,targets) end
+        ai = function(self,targets) return d.pickMostCombos(self,targets) or d.moveTowardEnemy(self,targets) or d.avoidEnemy(self) end
     },
     {
         class="Goatlord",
@@ -105,7 +105,7 @@ return {
             },
         cost = 4,
         weight = 1,
-        ai = function(self,targets) return d.pickMostCombos(self,targets) or d.moveTowardEnemy(self,targets) end
+        ai = function(self,targets) return d.pickMostCombos(self,targets) or d.moveTowardEnemy(self,targets) or d.avoidEnemy(self) end
     },
     {
         class="Demon",
@@ -121,7 +121,7 @@ return {
             },
         cost = 4,
         weight = 5,
-        ai = function(self,targets) return d.moveTowardWeakestEnemy(self,targets) end
+        ai = function(self,targets) return d.moveTowardWeakestEnemy(self,targets) or d.avoidEnemy(self) end
     },
     {
         class="Archer",
@@ -137,7 +137,7 @@ return {
             },
         cost = 3,
         weight = 5,
-        ai = function(self,targets) return d.pickFurthestAttack(self,targets) or d.moveTowardEnemy(self,targets) end
+        ai = function(self,targets) return d.pickFurthestAttack(self,targets) or d.moveTowardEnemy(self,targets) or d.avoidEnemy(self) end
     },
     {
         class="Thief",
@@ -153,7 +153,7 @@ return {
             },
         cost = 2,
         weight = 10,
-        ai = function(self,targets) return d.moveTowardEnemy(self,targets) end
+        ai = function(self,targets) return d.moveTowardEnemy(self,targets) or d.avoidEnemy(self) end
     },
     {
         class="TutorialBoy",
@@ -195,6 +195,6 @@ return {
             },
         cost = 5,
         weight = 2,
-        ai = function(self,targets) return d.pickMostCombos(self,targets) or d.moveTowardEnemy(self,targets) end
+        ai = function(self,targets) return d.pickMostCombos(self,targets) or d.moveTowardEnemy(self,targets) or d.avoidEnemy(self) end
     }
 }
