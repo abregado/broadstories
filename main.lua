@@ -1,4 +1,4 @@
-DEBUG_MODE = false
+DEBUG_MODE = true
 if DEBUG_MODE then require ('lovedebug') end
 gs = require('hump-master/gamestate') 
 
@@ -123,7 +123,19 @@ win/lose conditions
 
 
 
-function love.load()
+function love.load(args)
+    local FSmodes = love.window.getFullscreenModes(1)
+    local highMode = FSmodes[1]
+    local lowMode = FSmodes[#FSmodes]
+    love.window.setMode(lowMode.width,lowMode.height,{fullscreen=false}) 
+    
+    if args then
+        for i,v in ipairs(args) do
+            print (v)
+            
+            if v == "--fs" or v == "--fullscreen" then toggleFullscreen() end 
+        end
+    end
     lg.setDefaultFilter('nearest','nearest')
     gs.registerEvents()
     buildNextLevel()
@@ -134,6 +146,38 @@ function love.load()
     globTweens.grow = {tween=nil,val=1,low=1,high=1.2}
     
     setupTweens()
+    
+    local created = love.filesystem.createDirectory('levels')
+    if created == true then
+        --new install create all folders
+        love.filesystem.createDirectory('assets')
+        love.filesystem.createDirectory('units')
+    end
+    
+    local importedmod = require('mod') or "No Mod Found"
+    print(importedmod)
+end
+
+function toggleFullscreen()
+    local FSmodes = love.window.getFullscreenModes(1)
+    local highMode = FSmodes[1]
+    local lowMode = FSmodes[#FSmodes]
+    local fs = love.window.getFullscreen()
+    if fs then
+        love.window.setMode(lowMode.width,lowMode.height,{fullscreen=false}) 
+    else
+        love.window.setMode(highMode.width,highMode.height,{fullscreen=true}) 
+    end
+    buildNextLevel()
+end
+
+function love.keypressed(key)
+    if key == "s" then
+        -- To open a file or folder, "file://" must be prepended to the path.
+        love.system.openURL("file://"..love.filesystem.getSaveDirectory())
+    elseif key == 'f7' then
+        toggleFullscreen()
+    end
 end
 
 function setupTweens()

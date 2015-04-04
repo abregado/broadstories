@@ -95,6 +95,7 @@ function game:keypressed(key)
         elseif key == " " then self:startNextPhase()
         elseif key == "r" and DEBUG_MODE then self:triggerVictory() 
         elseif key == "k" and DEBUG_MODE then pimp.killTeam(self.control,2) 
+        
         end
     end
 end
