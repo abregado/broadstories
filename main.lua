@@ -1,4 +1,4 @@
-DEBUG_MODE = true
+DEBUG_MODE = false
 if DEBUG_MODE then require ('lovedebug') end
 gs = require('hump-master/gamestate') 
 
