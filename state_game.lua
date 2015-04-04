@@ -32,8 +32,8 @@ function game.new(map,control,tutorial)
     rbut.click = function() state:triggerRestart() end
     etbut.click = function() state:startNextPhase() end
     sbut.click = function() state:triggerSkip() end
-    state.ui:addElement(rbut)
     state.ui:addElement(etbut)
+    state.ui:addElement(rbut)
     
     if control and map then 
     state.ui:addElement(sbut)
@@ -95,7 +95,6 @@ function game:keypressed(key)
         elseif key == " " then self:startNextPhase()
         elseif key == "r" and DEBUG_MODE then self:triggerVictory() 
         elseif key == "k" and DEBUG_MODE then pimp.killTeam(self.control,2) 
-        
         end
     end
 end

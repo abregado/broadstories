@@ -10,7 +10,7 @@ local gridColor = {37,76,0}
 local g = {}
 
 function g.newGridArea(width,height,tilesize,ox,oy)
-print("building new grid of w/h pixels")
+    --print("building new grid of w/h pixels")
     o = {}
     o.tilelist = {}
     o.tileset = {}
@@ -30,7 +30,7 @@ print("building new grid of w/h pixels")
 end
 
 function g.newGrid(width,height,tilesize,ox,oy)
-    print("building new grid of w/h tiles")
+    --print("building new grid of w/h tiles")
     local o = {}
     o.tilelist = {}
     o.tileset = {}
@@ -487,7 +487,7 @@ function g.getGridDims(w,h)
         tw = tw - 1
     end    
     
-    print ("tilesize after resize"..tw)
+    --print ("tilesize after resize"..tw)
     
     local xo = (s.w-(tw*w))/2
     local yo = ((s.h-(tw*h))/2)+(lg:getHeight()*uibarsize)

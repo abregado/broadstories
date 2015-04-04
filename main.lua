@@ -21,6 +21,7 @@ uicon = require('UIcontroller')
 ibut = require('ui/iconButton')
 importer = require('importer')
 sd = require('ui/shapeDraw')
+modloader = require('modloader')
 
 PLAYERTEAM = 1
 ENEMYTEAM = 2
@@ -147,15 +148,7 @@ function love.load(args)
     
     setupTweens()
     
-    local created = love.filesystem.createDirectory('levels')
-    if created == true then
-        --new install create all folders
-        love.filesystem.createDirectory('assets')
-        love.filesystem.createDirectory('units')
-    end
-    
-    local importedmod = require('mod') or "No Mod Found"
-    print(importedmod)
+    modloader.checkStructure()
 end
 
 function toggleFullscreen()
@@ -175,6 +168,8 @@ function love.keypressed(key)
     if key == "s" then
         -- To open a file or folder, "file://" must be prepended to the path.
         love.system.openURL("file://"..love.filesystem.getSaveDirectory())
+    elseif key == "l" then
+        modloader.loadUnits(unitTypes)
     elseif key == 'f7' then
         toggleFullscreen()
     end

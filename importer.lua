@@ -55,7 +55,7 @@ function imp.buildBlocked(levelLua)
 end
 
 function imp.importEnts(map,control,levelLua,unitTypes)
-    print("starting ent import")
+    --print("starting ent import")
     if levelLua.layers[2] then
         local importData = levelLua.layers[2].data
         
@@ -78,9 +78,8 @@ function imp.importTileset(map,levelLua)
     
     local path = string.sub(levelLua.tilesets[1].image,3)
     
-    print("importing tileset graphics from",path)
+    --print("importing tileset graphics from",path)
     map.spriteSheet = lg.newImage(path)
-    print("done.")
     --generates a list of quads
     map.tileQuads = imp.buildQuadList(levelLua.tilesets[1].tilewidth,levelLua.tilesets[1].tileheight,levelLua.tilesets[1].imagewidth,levelLua.tilesets[1].imageheight)
     map.scale = map.ts/levelLua.tilesets[1].tilewidth
@@ -97,7 +96,7 @@ function imp.buildQuadList(tw,th,w,h)
 end
 
 function imp.assignTilesetData(map,levelLua)
-    print("assigning tile data")
+    --print("assigning tile data")
     --moves through cells and assigns a graphical tile number
     local importData = levelLua.layers[1].data
     for i,v in ipairs(map.tilelist) do
@@ -108,7 +107,7 @@ function imp.assignTilesetData(map,levelLua)
 end
 
 function imp.blockCells(map,blockTileList)
-    print("blocking cells")
+    --print("blocking cells")
     --disables all cells which have been assigned a graphical tile number that is listed in the blockTileList
     for i,v in ipairs(map.tilelist) do
         local walkable = true

@@ -31,7 +31,7 @@ function ibutton.new(xin,yin,control,icon,ready,w,h)
 	o.check = ibutton.check
 	o.drawTip = ibutton.drawTip
 	o.checkHover = ibutton.checkHover
-	print('ibut generated')
+	--print('ibut generated')
 	return o
 end
 

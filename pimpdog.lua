@@ -1,7 +1,7 @@
 pd = {}
 
 function pd.new(map,unitTypes,spriteList)
-    print("building new dog")
+    --print("building new dog")
     o={}
     o.map = map
     o.units = {}
