@@ -78,7 +78,6 @@ levels[3] = require('levels/broadstories_MageIntro')
 levels[4] = require('levels/broadstories_l1')
 levels[5] = require('levels/broadstories_l2')
 levels[6] = require('levels/gameboy1')
-levels[7] = require('levels/fantasy1')
 
 --img.tileset = lg.newImage(levels.demo.tilesets[1].image)
 
@@ -168,8 +167,10 @@ function love.keypressed(key)
     if key == "s" then
         -- To open a file or folder, "file://" must be prepended to the path.
         love.system.openURL("file://"..love.filesystem.getSaveDirectory())
-    elseif key == "l" then
+    elseif key == "u" then
         modloader.loadUnits(unitTypes)
+    elseif key == "l" then
+        modloader.loadLevels(levels)
     elseif key == 'f7' then
         toggleFullscreen()
     end

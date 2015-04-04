@@ -16,29 +16,32 @@ function ml.checkStructure()
 end
 
 function ml.loadUnits(unitTypes)
-    print("loading mods")
+    print("loading mods units")
     local files = fs.getDirectoryItems('modunits')
     for i,v in ipairs(files) do
         print(v)
-        local units = require('/modunits/'..ml.getBasename(v))
-        if #units>0 then
-            print("loaded list contains more than one entry")
-            for i,unit in pairs(units) do
-                if ml.checkUnitStructure(unit,unitTypes[1]) then
-                    local exists = ml.checkUnitTypeExists(unit,unitTypes)
-                    if exists then 
-                        unitTypes[exists] = unit
-                        print(unit.class.." already exists, updating source copy") 
+        local filename, ext = ml.getBasenameAndExtension(v)
+        if ext == 'lua' then 
+            local units = require('/modunits/'..filename)
+            if #units>0 then
+                print("loaded list contains more than one entry")
+                for i,unit in pairs(units) do
+                    if ml.checkUnitStructure(unit,unitTypes[1]) then
+                        local exists = ml.checkUnitTypeExists(unit,unitTypes)
+                        if exists then 
+                            unitTypes[exists] = unit
+                            print(unit.class.." already exists, updating source copy") 
+                        else
+                            ml.addUnitType(unit,unitTypes)
+                            print(unit.class.." does not exist and is valid. Adding to unit types")
+                        end
                     else
-                        ml.addUnitType(unit,unitTypes)
-                        print(unit.class.." does not exist and is valid. Adding to unit types")
+                        print("entry was not a valid unit structure")
                     end
-                else
-                    print("entry was not a valid unit structure")
                 end
+            else
+                print("loaded list contained no entries")
             end
-        else
-            print("loaded list contained no entries")
         end
     end
 end
@@ -71,8 +74,52 @@ function ml.checkUnitStructure(unit,template)
     return result    
 end
 
-function ml.getBasename(filename)
-  return filename:match("^([^%.]*)%.?") -- "myfile.lua" -> "myfile"
+function ml.getBasenameAndExtension(filename)
+  return filename:match("^([^%.]*)%.?(.*)$") -- "myfile.lua" -> "myfile", "lua"
+end
+
+function ml.loadLevels(levelList)
+    print("loading mod levels")
+    local files = fs.getDirectoryItems('modlevels')
+    for i,v in ipairs(files) do
+        print(v)
+        local filename, ext = ml.getBasenameAndExtension(v)
+        if ext == 'lua' then 
+            local level = require('/modlevels/'..filename)
+            if level then
+                print("loaded level is an array... continuing")
+                if ml.checkLevelStructure(level) then
+                    ml.addLevel(level,levelList)
+                    print(v.." was a valid level and has been added")
+                else
+                    print("not a valid level")
+                end
+            else
+                print("loaded item was not a level")
+            end
+        end
+    end
+end
+
+function ml.checkLevelStructure(level)
+    if not level.width then print("-- FAILED width --") return false end
+    if not level.height then print("-- FAILED height --") return false end
+    if not level.tilewidth then print("-- FAILED tilewidth --") return false end
+    if not level.tileheight then print("-- FAILED tileheight --") return false end
+    if not level.tilesets[1] then
+        print("-- FAILED no tilesets --") return false
+    else
+        local tileset = level.tilesets[1].image
+        local path = string.sub(tileset,3)
+        if not fs.exists(path) then print('cannot find custom tileset') return false end
+    end
+    if not level.layers[1] then print("-- FAILED layer1 --") return false end
+    if not level.layers[2] then print("-- FAILED layer2 --") return false end
+    return true
+end
+
+function ml.addLevel(level,levelList)
+    table.insert(levelList,level)
 end
 
 return ml
