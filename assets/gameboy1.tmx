@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="16" height="11" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="gameboy" tilewidth="32" tileheight="32">
+  <image source="gameboy_tileset.png" width="192" height="384"/>
+  <terraintypes>
+   <terrain name="gravel" tile="15"/>
+  </terraintypes>
+  <tile id="0" terrain=",,,0"/>
+  <tile id="1" terrain=",,0,0"/>
+  <tile id="2" terrain=",0,,0"/>
+  <tile id="3" terrain="0,,0,"/>
+  <tile id="4" terrain=",,,0"/>
+  <tile id="5" terrain=",,0,"/>
+  <tile id="6" terrain=",0,,"/>
+  <tile id="7" terrain="0,0,,"/>
+  <tile id="8" terrain=",0,,"/>
+  <tile id="9" terrain="0,,,"/>
+  <tile id="12" terrain="0,0,0,"/>
+  <tile id="13" terrain="0,0,,0"/>
+  <tile id="16" terrain="0,0,0,0"/>
+  <tile id="18" terrain="0,,0,0"/>
+  <tile id="19" terrain=",0,0,0"/>
+  <tile id="36">
+   <properties>
+    <property name="walkable" value="0"/>
+   </properties>
+  </tile>
+  <tile id="70">
+   <properties>
+    <property name="walkable" value="0"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="level" width="16" height="11">
+  <data encoding="base64" compression="zlib">
+   eJyNkV0KwCAMgzv3v4dhcVfYWXb/G61CC6HDusL3okmMSkQ0CElYqD1zoBkFFqbAj5pb6flRZ5oS+IvraLq6dqmGAz+7HNNl2KsdH8VmFTbhBF1u+Fn7od/yMAfP8f1a72z6XXOSwvS9X/TXPgfv1esQ5SDHD7/P8dR5ATzkCrg=
+  </data>
+ </layer>
+ <layer name="ents" width="16" height="11">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo4C2gAtKc0NpHiqaDQANhAAi
+  </data>
+ </layer>
+</map>

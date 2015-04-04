@@ -22,6 +22,8 @@ end
 function lgen.generateEnemies(control,threat)
     local map = control.map
     local tileList = grid.joinLists(grid.findAllAtY(map,map.th-1),grid.findAllAtY(map,map.th-2))
+    tileList = grid.joinLists(tileList,grid.findAllAtY(map,map.th-3))
+    tileList = grid.joinLists(tileList,grid.findAllAtY(map,map.th-4))
     tileList = grid.returnWalkable(tileList)
     local enemyList = {}
     local rand = math.random(1,2)

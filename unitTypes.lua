@@ -9,7 +9,7 @@ return {
         hero = true,
         stats = {
             hp = 4,
-            armor = 3,
+            armor = 4,
             str = 1,
             },
         cost = 10,
@@ -43,7 +43,7 @@ return {
         hero = true,
         stats = {
             hp = 3,
-            armor = 1,
+            armor = 2,
             str = 1,
             },
         cost = 10,
@@ -52,7 +52,7 @@ return {
     },
     {
         class="Beastmaster",
-        moveShape = function() return grid.joinLists(grid.newBox(1),grid.newCross(2)) end,
+        moveShape = function() return grid.newCircle(2) end,
         attackShape = function() return grid.newShapeFromGrid({
             {0,0,0,0,0,0,0},
             {0,0,1,0,1,0,0},
@@ -68,7 +68,7 @@ return {
         hero = true,
         stats = {
             hp = 4,
-            armor = 2,
+            armor = 3,
             str = 1,
             },
         cost = 10,
@@ -109,13 +109,13 @@ return {
     },
     {
         class="Demon",
-        moveShape = function() return grid.newCircle(4) end,
+        moveShape = function() return grid.newCircle(3) end,
         attackShape = function() return grid.newCross(1) end,
         img = 13,
         attackImg = 9,
         color = {125,200,125},
         stats = {
-            hp = 5,
+            hp = 3,
             armor = 1,
             str = 1,
             },

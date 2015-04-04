@@ -157,8 +157,12 @@ function game:draw()
     self.control:draw(hoverCell)
     
     tut.draw()
-    lg.print(threatLevel,0,lg:getHeight()-10)
     self.ui:draw()
+    lg.setColor(255,255,255)
+    local lastUI = self.ui.elements[#self.ui.elements]
+    lg.print("Wins: "..wins,lastUI.x+lastUI.w+4,10)
+    lg.print("Losses: "..losses,lastUI.x+lastUI.w+4,30)
+    lg.print("Threat: "..threatLevel,lastUI.x+lastUI.w+4,50)
     
 end
 
@@ -224,16 +228,19 @@ function game:update(dt)
 end
 
 function game:triggerVictory()
-    threatLevel = threatLevel + 1
+    threatLevel = threatLevel + 2
     levelProg = levelProg + 1
+    wins = wins + 1
     gs.switch(trans.new({aa.new({trans.newFlyup("VICTORY!"),trans.newUnderbar("You defeated all enemies")})}))
 end
 
 function game:triggerRetreat()
+    losses = losses + 1
     gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You don't have enough heroes to win",-60,true)})}))
 end
 
 function game:triggerRestart()
+    losses = losses + 1
     gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You gave up.",-60,true)})}))
 end
 

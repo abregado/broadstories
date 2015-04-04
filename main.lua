@@ -1,4 +1,4 @@
-DEBUG_MODE = false
+DEBUG_MODE = true
 if DEBUG_MODE then require ('lovedebug') end
 gs = require('hump-master/gamestate') 
 
@@ -76,6 +76,8 @@ levels[2] = require('levels/broadstories_archerIntro')
 levels[3] = require('levels/broadstories_MageIntro')
 levels[4] = require('levels/broadstories_l1')
 levels[5] = require('levels/broadstories_l2')
+levels[6] = require('levels/gameboy1')
+levels[7] = require('levels/fantasy1')
 
 --img.tileset = lg.newImage(levels.demo.tilesets[1].image)
 
@@ -87,8 +89,11 @@ anims = {}
 anims.stand = a8.newAnimation(sheet.sample(3,1),1)
 anims.walk = a8.newAnimation(sheet.sample('3-4',1),0.3)
 
-threatLevel = 1
+threatLevel = 0
 levelProg = 1
+wins = 0
+losses = 0
+
 
 --[[
 #############TODOS###############
@@ -154,7 +159,7 @@ end
 
 function buildNextLevel()
     if levels[levelProg] then
-        gs.switch(importer.import(levels[levelProg],{10},unitTypes,unitImg))
+        gs.switch(importer.import(levels[levelProg],unitTypes,unitImg))
     else
         gs.switch(game.new())
     end

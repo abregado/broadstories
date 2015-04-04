@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="16" height="11" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="fantasy-tileset" tilewidth="32" tileheight="32">
+  <image source="fantasy-tileset.png" width="256" height="832"/>
+  <tile id="7">
+   <properties>
+    <property name="walkable" value="0"/>
+   </properties>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="walkable" value="0"/>
+   </properties>
+  </tile>
+  <tile id="24">
+   <properties>
+    <property name="walkable" value="0"/>
+   </properties>
+  </tile>
+  <tile id="30">
+   <properties>
+    <property name="walkable" value="0"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="level" width="16" height="11">
+  <data encoding="base64" compression="zlib">
+   eJzjYGBg4KAQc5KB0fXLkoBJ1Y9sLz79fHj0yxOhH5/9hPRjw8S6XxILxucmdP3kxCkh/djchIwpTXMwDAB3cgpJ
+  </data>
+ </layer>
+ <layer name="ents" width="16" height="11">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAdYAZiFgr0MwIxE5XcQmvANtAOwAHYcLCHCwAALNgAHQ==
+  </data>
+ </layer>
+</map>

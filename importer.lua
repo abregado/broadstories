@@ -5,12 +5,16 @@ local a8 = require('anim8')
 
 imp = {}
 
-function imp.import(levelLua,blockTileList,unitTypes,spriteList)
+function imp.import(levelLua,unitTypes,spriteList)
     
     --generate map from tiled dimensions (normal grid)
     local w,h = levelLua.width,levelLua.height
     local tw,xo,yo = grid.getGridDims(w,h)
     local map = grid.newGrid(w,h,tw,xo,yo)
+    
+    --buildBlocktileList
+    local blockTileList = imp.buildBlocked(levelLua)
+    
     --modify grid object to handle:
         --import tileset data, store in grid object
         imp.importTileset(map,levelLua)
@@ -20,6 +24,7 @@ function imp.import(levelLua,blockTileList,unitTypes,spriteList)
         imp.blockCells(map,blockTileList)
         
         --update cell draw
+        imp.updateFunctions(map)
     
     --generate entity controller
     local control = pimp.new(map,unitTypes,spriteList)
@@ -39,6 +44,14 @@ function imp.import(levelLua,blockTileList,unitTypes,spriteList)
     --generate new gamestate providing grid and control objects
     --return new gamestate
     return game.new(map,control)
+end
+
+function imp.buildBlocked(levelLua)
+    local list = {}
+    for i,v in pairs(levelLua.tilesets[1].tiles) do
+        table.insert(list,v.id+1)
+    end
+    return list
 end
 
 function imp.importEnts(map,control,levelLua,unitTypes)
@@ -69,7 +82,18 @@ function imp.importTileset(map,levelLua)
     map.spriteSheet = lg.newImage(path)
     print("done.")
     --generates a list of quads
-    map.tileQuads = a8.newGrid(levelLua.tilewidth,levelLua.tileheight,map.spriteSheet:getWidth(),map.spriteSheet:getHeight())
+    map.tileQuads = imp.buildQuadList(levelLua.tilesets[1].tilewidth,levelLua.tilesets[1].tileheight,levelLua.tilesets[1].imagewidth,levelLua.tilesets[1].imageheight)
+    map.scale = map.ts/levelLua.tilesets[1].tilewidth
+end
+
+function imp.buildQuadList(tw,th,w,h)
+    local quads = {}
+    for i=0,math.floor(h/th)-1 do
+        for j=0,math.floor(w/tw)-1 do
+            table.insert(quads,lg.newQuad(j*tw,i*th,tw,th,w,h))
+        end
+    end
+    return quads
 end
 
 function imp.assignTilesetData(map,levelLua)
@@ -99,22 +123,20 @@ end
 
 function imp.updateFunctions(map)
     --replace the grid draw with the new one in this class
+    map.draw = imp.newDraw
 end
 
 function imp.newDraw(self)
+    --lg.draw(self.spriteSheet,0,0)
     for i,v in ipairs(self.tilelist) do
-        local x,y = g.getOrigin(self,v)
-        if v.obj then
-            lg.setColor(objColor)
-        else
-            lg.setColor(cellColor)
+        if v.active then
+            lg.setColor(255,255,255)
+            local x,y = grid.getOrigin(self,v)
+            --lg.circle("fill",x,y,5,5)
+            local quad = self.tileQuads[v.imgNum] or lg.newQuad(0,0,32,32,256,320)
+            lg.draw(self.spriteSheet,quad,x,y,0,self.scale,self.scale)
         end
-        lg.rectangle("fill",x,y,self.ts,self.ts)
-        lg.setColor(gridColor)
-        lg.rectangle("line",x,y,self.ts,self.ts)
     end
-    lg.setColor(0,255,0)
-    lg.rectangle("line",self.x,self.y,self.w,self.h)
 end
 
 return imp

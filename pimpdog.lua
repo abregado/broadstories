@@ -140,7 +140,7 @@ function pd.doTeamAI(self,team)
         end
     end
     
-    if self.turnsSinceDamage > 4 then        
+    if self.turnsSinceDamage > 6 then        
         self.priorityTarget = targetList[math.random(1,#targetList)]
     end
         
