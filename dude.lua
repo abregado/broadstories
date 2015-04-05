@@ -167,8 +167,11 @@ function d.draw(self,x,y,showStats)
     if self.isDead == false and self.npc == true then
         if self.damage >= self.stats.armor then
             sd.drawDangerCircle(self.control.map,self.cell,{200, 30, 30})
+            tut.complete("shapes")
+            tut.display("rdanger")
         elseif self.damage > 0 then
             sd.drawDangerCircle(self.control.map,self.cell,{255, 238, 0})
+            tut.display("ydanger")
         end
     end
 

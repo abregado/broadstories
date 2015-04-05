@@ -1,3 +1,5 @@
+local tut = require('tutorial')
+
 sd = {}
 
 function sd.drawAttackShape(list,map)

@@ -46,6 +46,10 @@ function t.newBaseSlide(ID, nextID, desc, autoDisplay, draws)
     return o
 end
 
+function t.clearTuts()
+    slides = {}
+end
+
 function t.resetTutorials()
     for i,v in ipairs(slides) do
         v.state = 2
@@ -94,8 +98,8 @@ end
 
 function t.prepare(ID)
     
-    local v = getSlide(ID)
-    if v.state > 1 then 
+    local v = getSlide(ID) or nil
+    if v and v.state > 1 then 
         v.state = 0 
         if v.auto then
             t.display(ID)
@@ -107,15 +111,15 @@ end
 
 function t.display(ID)
     if not checkActive() then
-        local v = getSlide(ID)
-        if v.state == 0 then v.state = 1 return true end
+        local v = getSlide(ID) or nil
+        if v and v.state == 0 then v.state = 1 return true end
     end
     return false
 end
 
 function t.complete(ID)
-    local v = getSlide(ID)
-    if v.state == 1 then
+    local v = getSlide(ID) or nil
+    if v and v.state == 1 then
         v.state = 2
         if v.nextID then t.prepare(v.nextID) end
         return true 

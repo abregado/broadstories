@@ -36,7 +36,7 @@ function game.new(map,control,tutorial)
     state.ui:addElement(rbut)
     
     if control and map then 
-    state.ui:addElement(sbut)
+        state.ui:addElement(sbut)
     end
     
     state.collected = nil
@@ -64,10 +64,75 @@ function game.new(map,control,tutorial)
     
     inputAccepted = true
     
-    
-    
+    tut.clearTuts()
+    if levelProg < 4 then
+        game.setupTuts[levelProg](state.control.units[1],etbut,sbut,rbut)
+    end
     
     return state
+end
+
+game.setupTuts = {}
+
+game.setupTuts[1] = function (hero,etbutton,sbutton,rbutton)
+    td = tut.td
+    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Welcome to the Broadstories Prototype. Please play through this short tutorial to learn how to play the game.",nil,true)
+    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","You can skip any tutorial level by clicking this button.",nil,true)
+    local intro3 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","You can give up and retry any level by pressing this button.",nil,true)
+    local selectDude = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Click on your Fighter Hero with the left mouse button.",nil,true)
+    local moveDude = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Click on one of the blue circles with the left mouse button to move your Fighter Hero.",nil,true)
+    local endTurn = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Now, end your turn by pressing this button.",nil,true)
+    local shapes = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","The red area shows where your Fighter Hero can attack. Try placing the Hero so the red shape overlaps the Thief's position.",nil,true)
+    local attack = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Good! Now end the turn and your Fighter Hero will attack automatically.",nil,true)
+    
+    
+    tut.addSlide("intro","intro2","Introduction Slide",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("intro2","intro3","Introduction Slide",true,function() 
+        lg.draw(intro2,sbutton.x+(sbutton.w/2),(sbutton.y+sbutton.h)*1.1) 
+        lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",sbutton.x,sbutton.y,sbutton.w,sbutton.h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
+    tut.addSlide("intro3","select","Introduction Slide",true,function()
+        lg.draw(intro3,rbutton.x+(rbutton.w/2),(rbutton.y+rbutton.h)*1.1) 
+        lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",rbutton.x,rbutton.y,rbutton.w,rbutton.h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
+    tut.addSlide("select","move","Select a Dude Slide",true,function() lg.draw(selectDude,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("move","endturn","Move a Dude Slide",true,function() lg.draw(moveDude,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("endturn","shapes","End your turn",true,function() 
+        lg.draw(endTurn,etbutton.x+(etbutton.w/2)-(lg.getWidth()/3*2),(sbutton.y+sbutton.h)*1.1) 
+        lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",etbutton.x,etbutton.y,etbutton.w,etbutton.h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
+    tut.addSlide("shapes","attack","Attackshapes",false,function() lg.draw(shapes,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("attack",nil,"End your turn",true,function() 
+        lg.draw(attack,etbutton.x+(etbutton.w/2)-(lg.getWidth()/3*2),(sbutton.y+sbutton.h)*1.1)
+        lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",etbutton.x,etbutton.y,etbutton.w,etbutton.h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
+    
+    
+    tut.prepare("intro")
+end
+
+game.setupTuts[2] = function (hero,etbutton,sbutton,rbutton)
+    td = tut.td
+    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Meet the Ranger Hero. This Hero has a long range attack but is not very effective at close range.",nil,true)
+    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","The enemy on this level is tougher. Victory will require both your Heroes to work together.",nil,true)
+    local ydanger = td.drawBubble(5,lg.getWidth()/5*3,lg.getHeight()/5,"center","The yellow circle around the enemy's feet shows that it is under attack but its armor will negate the damage. Move a second Hero to an attack position.",nil,true)
+    local rdanger = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Good! The circle has changed to red. Now end your turn and let your Heroes attack.",nil,true)
+   
+    tut.addSlide("intro","intro2","Ranger Intro",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("intro2","ydanger","Toughguy",true,function() lg.draw(intro2,lg.getWidth()/6,lg.getHeight()/4) end)
+    tut.addSlide("ydanger","rdanger","yellow danger",false,function() lg.draw(ydanger,10,lg.getHeight()/4*3) end)
+    tut.addSlide("rdanger",nil,"red danger",false,function() lg.draw(rdanger,etbutton.x+(etbutton.w/2)-(lg.getWidth()/3*2),(sbutton.y+sbutton.h)*1.1) lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",etbutton.x,etbutton.y,etbutton.w,etbutton.h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
+  
+    tut.prepare("intro")
+end
+
+game.setupTuts[3] = function (hero,button)
+    td = tut.td
+    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Meet the Mage Hero, another long range Hero. The Mage is also the weakest Hero so keep it protected. In the final game the Mage will have a host of support abilities.",nil,true)
+    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","and.. The Beastmaster Hero. The other close range Hero. In the final game, the Beastmaster will be responsible for capturing wild beasts and training them to fight for you.",nil,true)
+    local intro3 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Defeat the enemy on this level.",nil,true)
+   
+    tut.addSlide("intro","intro2","Mage Introduction",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("intro2","intro3","BM Introduction",true,function() lg.draw(intro2,lg.getWidth()/6,lg.getHeight()/6) end)
+    tut.addSlide("intro3",nil,"goal",true,function() lg.draw(intro3,lg.getWidth()/6,lg.getHeight()/2) end)
+  
+    tut.prepare("intro")
 end
 
 
@@ -81,12 +146,19 @@ function game:mousepressed(x,y,button)
                 if tile.obj == nil and grid.checkCellInList(tile,self.collected.moves) then
                     pimp.placeUnit(self.control,tile,self.collected)
                     self.collected = nil
+                    tut.complete("move")
+                    tut.complete("ydanger")
                 end
             elseif tile and tile.obj and not self.collected and not tile.obj.npc then
                 self.collected = pimp.takeUnit(self.control,tile)
+                tut.complete("select")
+                tut.display("shapes")
             end
         end
     end
+    tut.complete("intro3")
+    tut.complete("intro2")
+    tut.complete("intro")
 end
 
 function game:keypressed(key)
@@ -97,6 +169,9 @@ function game:keypressed(key)
         elseif key == "k" and DEBUG_MODE then pimp.killTeam(self.control,2) 
         end
     end
+    tut.complete("intro3")
+    tut.complete("intro2")
+    tut.complete("intro")
 end
 
 function game:draw()
@@ -156,7 +231,7 @@ function game:draw()
     
     self.control:draw(hoverCell)
     
-    tut.draw()
+    --draw UI and stats
     self.ui:draw()
     lg.setColor(255,255,255)
     local lastUI = self.ui.elements[#self.ui.elements]
@@ -164,10 +239,16 @@ function game:draw()
     lg.print("Losses: "..losses,lastUI.x+lastUI.w+4,30)
     lg.print("Threat: "..threatLevel,lastUI.x+lastUI.w+4,50)
     
+    
+    tut.draw()
+    
 end
 
 function game:startNextPhase()
     if self.collected == nil then
+        tut.complete("rdanger")
+        tut.complete("endturn")
+        tut.complete("attack")
         if self.phase == 0 then --end of player movement phase
             --check for Retreat or Defeat
             self:checkRetreat()
