@@ -67,8 +67,10 @@ function game.new(map,control,tutorial)
     inputAccepted = true
     
     tut.clearTuts()
-    if levelProg < 4 then
+    if levelProg < 7 then
         game.setupTuts[levelProg](state.control.units[1],etbut,sbut,rbut)
+    elseif levelProg == #levels+1 then
+        game.setupTuts[7](state.control.units[1],etbut,sbut,rbut)
     end
     
     return state
@@ -137,6 +139,51 @@ game.setupTuts[3] = function (hero,button)
     tut.prepare("intro")
 end
 
+game.setupTuts[4] = function (hero,button)
+    td = tut.td
+    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Fights will end if you lose too many Heroes.",nil,true)
+    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","From now on it is possible that you can fail.",nil,true)
+   
+    tut.addSlide("intro","intro2","Losing",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("intro2",nil,"Losing2",true,function() lg.draw(intro2,lg.getWidth()/6,lg.getHeight()/4*3) end)
+  
+    tut.prepare("intro")
+end
+
+game.setupTuts[5] = function (hero,button)
+    td = tut.td
+    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","These enemies are very strong. You will need to use three Heroes to defeat them.",nil,true)
+    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","You will fail if you have less than three Heroes remaining.",nil,true)
+   
+    tut.addSlide("intro","intro2","Losing",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4) end)
+    tut.addSlide("intro2",nil,"Losing2",true,function() lg.draw(intro2,lg.getWidth()/6,lg.getHeight()/4*3) end)
+  
+    tut.prepare("intro")
+end
+
+game.setupTuts[6] = function (hero,button)
+    td = tut.td
+    local intro = td.drawBubble(5,lg.getWidth()/2,lg.getHeight()/2,"center","Levels can be built using the Tiled Editor and imported into this prototype.",nil,true)
+    local intro2 = td.drawBubble(5,lg.getWidth()/2,lg.getHeight()/2,"center","You can also import new tileset graphics to use in your levels. Read the documentation to find out how.",nil,true)
+   
+    tut.addSlide("intro","intro2","LevelEditing",true,function() lg.draw(intro,10,lg.getHeight()/2-10) end)
+    tut.addSlide("intro2",nil,"TilesetImport",true,function() lg.draw(intro2,lg.getWidth()/2,10) end)
+  
+    tut.prepare("intro")
+end
+
+game.setupTuts[7] = function (hero,button)
+    td = tut.td
+    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","From now on the game will play in Endless Mode. New fights will be randomly generated.. FOREVER",nil,true)
+    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Have your say on development at www.broadstories.com",nil,true)
+    local intro3 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Happy Hunting and thanks for playing!",nil,true)
+   
+    tut.addSlide("intro","intro2","LevelEditing",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("intro2","intro3","TilesetImport",true,function() lg.draw(intro2,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("intro3",nil,"TilesetImport",true,function() lg.draw(intro3,lg.getWidth()/6,lg.getHeight()/4*3) end)
+  
+    tut.prepare("intro")
+end
 
 
 
@@ -161,6 +208,11 @@ function game:mousepressed(x,y,button)
     tut.complete("intro3")
     tut.complete("intro2")
     tut.complete("intro")
+end
+
+function game:mousereleased(x,y,button)
+    local sys = love.system.getOS()
+    if sys == "Android" then love.mouse.setPosition(-10,-10) end
 end
 
 function game:keypressed(key)
