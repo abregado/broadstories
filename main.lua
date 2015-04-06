@@ -127,7 +127,8 @@ function love.load(args)
     local FSmodes = love.window.getFullscreenModes(1)
     local highMode = FSmodes[1]
     local lowMode = FSmodes[#FSmodes]
-    love.window.setMode(lowMode.width,lowMode.height,{fullscreen=false}) 
+    --love.window.setMode(lowMode.width,lowMode.height,{fullscreen=false}) 
+    love.window.setMode(320,240,{fullscreen=false}) 
     
     if args then
         for i,v in ipairs(args) do

@@ -263,7 +263,12 @@ function pd.addInjuryPairs(self,injured)
     for i,victim in ipairs(injured) do
         local anims = {}
         for j,attacker in ipairs(victim.attackers) do
-            local newAnim = aa.newIconShootAnim(attacker.x,attacker.y,victim.x,victim.y,attackImg[attacker.attackImg])
+            local atyp = attacker.attackImg
+            local scale = self.map.ts/32
+            local newAnim = aa.newIconShootAnim(attacker.x,attacker.y,victim.x,victim.y,attackImg[atyp],scale)
+            if atyp == 5 then
+                newAnim = aa.newIconThrowAnim(attacker.x,attacker.y,victim.x,victim.y,attackImg[atyp],scale)
+            end
             table.insert(anims,newAnim)
         end
         local attackAnim = aa.new(anims)

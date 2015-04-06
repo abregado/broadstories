@@ -79,16 +79,17 @@ function aa.newShootAnim(x,y,tx,ty,icon)
     return o
 end
 
-function aa.newIconShootAnim(x,y,tx,ty,icon)
+function aa.newIconShootAnim(x,y,tx,ty,icon,scale)
     local o = {}
     o.draw = function(self)
         lg.setColor(255,255,255)
         local ox,oy = self.icon:getWidth()/2,self.icon:getHeight()/2
-        lg.draw(self.icon,self.x,self.y,self.angle,1.5,1.5,ox,oy)
+        lg.draw(self.icon,self.x,self.y,self.angle,self.scale,self.scale,ox,oy)
     end
     o.perc = 0
     o.icon = icon
     o.x = x
+    o.scale = scale or 1.5
     o.y = y
     o.tx = tx
     o.ty = ty
@@ -98,21 +99,22 @@ function aa.newIconShootAnim(x,y,tx,ty,icon)
     return o
 end
 
-function aa.newIconThrowAnim(x,y,tx,ty,icon)
+function aa.newIconThrowAnim(x,y,tx,ty,icon,scale)
     local o = {}
     o.draw = function(self)
         lg.setColor(255,255,255)
         local ox,oy = self.icon:getWidth()/2,self.icon:getHeight()/2
-        lg.draw(self.icon,self.x,self.y,self.angle,1.5,1.5,ox,oy)
+        lg.draw(self.icon,self.x,self.y,self.angle,self.scale,self.scale,ox,oy)
     end
     o.perc = 0
     o.icon = icon
     o.x = x
     o.y = y
+    o.scale = scale or 1.5
     o.tx = tx
     o.ty = ty
     o.angle = 0
-    o.tween = tween.new(1,o,{x=tx,y=ty,angle=math.pi*4},'linear')
+    o.tween = tween.new(0.5,o,{x=tx,y=ty,angle=math.pi*2},'linear')
     
     return o
 end
