@@ -10,8 +10,10 @@ function game.new(map,control,tutorial)
     if map then
         state.map = map
     else
-        tw,xo,yo = grid.getGridDims(15,11)
-        state.map = grid.newGrid(15,11,tw,xo,yo)
+        local mw = math.random(10,18)
+        local mh = math.random(8,13)
+        tw,xo,yo = grid.getGridDims(mw,mh)
+        state.map = grid.newGrid(mw,mh,tw,xo,yo)
     end
     
     if control then
