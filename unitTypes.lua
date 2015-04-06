@@ -105,7 +105,7 @@ return {
             },
         cost = 4,
         weight = 1,
-        ai = function(self,targets) return d.pickMostCombos(self,targets) or d.moveTowardEnemy(self,targets) or d.avoidEnemy(self) end
+        ai = function(self,targets) return d.pickMostCombos(self,targets) or d.moveTowardEnemy(self,targets) end
     },
     {
         class="Demon",
@@ -121,7 +121,7 @@ return {
             },
         cost = 4,
         weight = 5,
-        ai = function(self,targets) return d.moveTowardWeakestEnemy(self,targets) or d.avoidEnemy(self) end
+        ai = function(self,targets) return d.moveTowardWeakestEnemy(self,targets) end
     },
     {
         class="Archer",

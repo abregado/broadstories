@@ -37,7 +37,7 @@ function trans:addToRegister(anim,force)
 end
 
 function trans:draw()
-    if self.from then self.from:draw() end
+    if self.from then self.from:draw(true) end
     
     if self.animRegister[1] and self.animRegister[1].isAnim then
         self.animRegister[1]:draw()
@@ -72,17 +72,27 @@ function trans:enter(from)
     self.from = from
 end
 
-function trans.newFadeout(text,startY)
+function trans.newFadeout(text,startY,bad)
     local o = {}
     o.draw = function(self)
+        
+        local alpha = self.alpha
+        if alpha > 255 then alpha = 255 end
+        
+        local topH = lg.getHeight()/2*self.perc
+        local botY = lg.getHeight()-(lg.getHeight()/2*self.perc)
+        if bad then lg.setColor(255,0,0,alpha/4) else lg.setColor(0,0,255,alpha/4) end
+        lg.rectangle("fill",0,0,lg.getWidth(),topH)
+        lg.rectangle("fill",0,botY,lg.getWidth(),lg.getHeight())
         
         local fontHeight = flyupFont:getHeight(self.text)
         local fontWidth = flyupFont:getWidth(self.text)
         
-        lg.setColor(barColor)
+        
+        lg.setColor(barColor[1],barColor[2],barColor[3],alpha)
         lg.rectangle("fill",0,self.y-10,lg.getWidth(),fontHeight+20)
         
-        lg.setColor(fontColor)
+        lg.setColor(fontColor[1],fontColor[2],fontColor[3],alpha)
         lg.setFont(flyupFont)
         lg.print(self.text,self.x+lg.getWidth()/2-(fontWidth/2),self.y)
 
@@ -91,16 +101,23 @@ function trans.newFadeout(text,startY)
     o.text = text
     o.x = 0
     o.y = startY or lg:getHeight()/2
-    o.alpha = 255
-    o.tween = tween.new(5,o,{alpha=0},'outQuad')
+    o.alpha = 512
+    o.perc = 1
+    o.tween = tween.new(1.5,o,{alpha=0},'inQuad')
     
     return o
 end
 
 
-function trans.newFlyup(text,endY)
+function trans.newFlyup(text,endY,bad)
     local o = {}
     o.draw = function(self)
+        local topH = lg.getHeight()/2*self.perc
+        local botY = lg.getHeight()-(lg.getHeight()/2*self.perc)
+        if bad then lg.setColor(255,0,0,255/4) else lg.setColor(0,0,255,255/4) end
+        lg.rectangle("fill",0,0,lg.getWidth(),topH)
+        lg.rectangle("fill",0,botY,lg.getWidth(),lg.getHeight())
+        
         
         local fontHeight = flyupFont:getHeight(self.text)
         local fontWidth = flyupFont:getWidth(self.text)
@@ -117,7 +134,8 @@ function trans.newFlyup(text,endY)
     o.text = text
     o.x = 0
     o.y = lg.getHeight()
-    o.tween = tween.new(3,o,{y=endY or -100},'outQuad')
+    o.perc = 0
+    o.tween = tween.new(0.5,o,{y=endY or -100,perc=1},'linear')
     
     return o
 end
@@ -147,6 +165,8 @@ function trans.newUnderbar(text,endY,bad)
     
     return o
 end
+
+
 
 
 return trans

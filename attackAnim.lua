@@ -1,5 +1,10 @@
 local vl = require('hump-master/vector-light')
 
+local flyupFont = lg.newFont("/assets/ccaps.ttf",40)
+local underbarFont = lg.newFont("/assets/ccaps.ttf",20)
+local barColor = {255,255,255}
+local fontColor = {0,0,0}
+
 aa = {}
 
 function aa.new(animGroup)
@@ -155,5 +160,77 @@ function aa.draw(self)
         v:draw()
     end
 end
+
+function aa.newToasterCome(text)
+    local o = {}
+    o.draw = function(self)
+        
+        local fontHeight = flyupFont:getHeight(self.text)
+        local fontWidth = flyupFont:getWidth(self.text)
+        
+        lg.setColor(barColor)
+        lg.rectangle("fill",0,self.y,lg.getWidth(),fontHeight+20)
+        
+        lg.setColor(fontColor)
+        lg.setFont(flyupFont)
+        lg.print(self.text,self.x+lg.getWidth()/2-(fontWidth/2),self.y+10)
+         
+    end
+    o.text = text
+    o.x = 0
+    o.y = 0-flyupFont:getHeight(text)-20
+    o.tween = tween.new(0.5,o,{y=0},'outQuad')
+    
+    return o
+end
+
+function aa.newToasterWait(text,wait)
+    local o = {}
+    o.draw = function(self)
+        
+        local fontHeight = flyupFont:getHeight(self.text)
+        local fontWidth = flyupFont:getWidth(self.text)
+        
+        lg.setColor(barColor)
+        lg.rectangle("fill",0,self.y,lg.getWidth(),fontHeight+20)
+        
+        lg.setColor(fontColor)
+        lg.setFont(flyupFont)
+        lg.print(self.text,self.x+lg.getWidth()/2-(fontWidth/2),self.y+10)
+         
+    end
+    o.text = text
+    o.x = 0
+    o.blank = 0
+    o.y = 0
+    o.tween = tween.new(wait,o,{blank=10},'outQuad')
+    
+    return o
+end
+
+function aa.newToasterGo(text)
+    local o = {}
+    o.draw = function(self)
+        
+        local fontHeight = flyupFont:getHeight(self.text)
+        local fontWidth = flyupFont:getWidth(self.text)
+        
+        lg.setColor(barColor)
+        lg.rectangle("fill",0,self.y,lg.getWidth(),fontHeight+20)
+        
+        lg.setColor(fontColor)
+        lg.setFont(flyupFont)
+        lg.print(self.text,self.x+lg.getWidth()/2-(fontWidth/2),self.y+10)
+        
+    end
+    o.text = text
+    o.x = 0
+    o.y = 0
+    o.tween = tween.new(0.2,o,{y=0-flyupFont:getHeight(text)-20},'outQuad')
+    
+    return o
+end
+
+
 
 return aa

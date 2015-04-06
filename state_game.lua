@@ -174,7 +174,7 @@ function game:keypressed(key)
     tut.complete("intro")
 end
 
-function game:draw()
+function game:draw(noUI)
     local hoverCell = nil
 
     local mx,my = lm.getPosition()
@@ -229,18 +229,24 @@ function game:draw()
     
     end
     
+    
+    
+    if not noUI then
+        --draw UI and stats
+        self.ui:draw()
+        lg.setColor(255,255,255)
+        local lastUI = self.ui.elements[#self.ui.elements]
+        lg.print("Wins: "..wins,lastUI.x+lastUI.w+4,10)
+        lg.print("Losses: "..losses,lastUI.x+lastUI.w+4,30)
+        lg.print("Threat: "..threatLevel,lastUI.x+lastUI.w+4,50)    
+        
+    end
+    
     self.control:draw(hoverCell)
     
-    --draw UI and stats
-    self.ui:draw()
-    lg.setColor(255,255,255)
-    local lastUI = self.ui.elements[#self.ui.elements]
-    lg.print("Wins: "..wins,lastUI.x+lastUI.w+4,10)
-    lg.print("Losses: "..losses,lastUI.x+lastUI.w+4,30)
-    lg.print("Threat: "..threatLevel,lastUI.x+lastUI.w+4,50)
-    
-    
-    tut.draw()
+    if not noUI then
+        tut.draw()
+    end
     
 end
 
@@ -261,11 +267,15 @@ function game:startNextPhase()
             --clean up dead guys
             pimp.cleanDead(self.control)
             --set next phase
+            
             self.phase = 1
             inputAccepted = false
         elseif self.phase == 1 then --end of player attack phase
             --clean up dead guys
             pimp.cleanDead(self.control)
+            --check for victory
+            self:checkVictory()
+            pimp.newToaster(self.control,"ENEMY TURN")
             --calculate enemy movement
             pimp.updateTeamMoves(self.control,2)
             pimp.doTeamAI(self.control,2)
@@ -286,8 +296,8 @@ function game:startNextPhase()
             pimp.updateTeamMoves(self.control,1)
             pimp.updateTeamMoves(self.control,2)
             pimp.checkDamage(self.control)
-            --check for victory
-            self:checkVictory()
+            
+            pimp.newToaster(self.control,"PLAYERS TURN")
             self.phase = 0
             inputAccepted = true
         end
@@ -312,23 +322,35 @@ function game:triggerVictory()
     threatLevel = threatLevel + 2
     levelProg = levelProg + 1
     wins = wins + 1
-    gs.switch(trans.new({aa.new({trans.newFlyup("VICTORY!"),trans.newUnderbar("You defeated all enemies")})}))
+    gs.switch(trans.new({
+        aa.new({trans.newFlyup("VICTORY!",lg.getHeight()/2)}),
+        aa.new({trans.newFadeout("VICTORY!",lg.getHeight()/2)})}
+        ))
 end
 
 function game:triggerRetreat()
     losses = losses + 1
-    gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You don't have enough heroes to win",-60,true)})}))
+    gs.switch(trans.new({
+        aa.new({trans.newFlyup("RETREAT!",lg.getHeight()/2,true)}),
+        aa.new({trans.newFadeout("RETREAT!",lg.getHeight()/2,true)})}
+        ))
 end
 
 function game:triggerRestart()
     losses = losses + 1
-    gs.switch(trans.new({aa.new({trans.newFlyup("RETREAT!"),trans.newUnderbar("You gave up.",-60,true)})}))
+    gs.switch(trans.new({
+        aa.new({trans.newFlyup("RELOADING",lg.getHeight()/2,true)}),
+        aa.new({trans.newFadeout("RELOADING",lg.getHeight()/2,true)})}
+        ))
 end
 
 function game:triggerSkip()
     levelProg = levelProg + 1
     threatLevel = threatLevel + 1
-    gs.switch(trans.new({aa.new({trans.newFlyup("Level Skipped"),trans.newUnderbar("You didn't need that tutorial anyway.",-60)})}))
+    gs.switch(trans.new({
+        aa.new({trans.newFlyup("TUTORIAL SKIPPED",lg.getHeight()/2)}),
+        aa.new({trans.newFadeout("TUTORIAL SKIPPED",lg.getHeight()/2)})}
+        ))
 end
 
 function game:checkRetreat()

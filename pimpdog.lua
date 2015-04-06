@@ -364,6 +364,11 @@ function pd.findAttackSquares(self, unit)
     return options
 end
 
+function pd.newToaster(self,text)
+    self:addToRegister(aa.new({aa.newToasterCome(text)}))
+    self:addToRegister(aa.new({aa.newToasterWait(text,1)}))
+    self:addToRegister(aa.new({aa.newToasterGo(text)}))
+end
 
 
 return pd
