@@ -147,6 +147,7 @@ function love.load(args)
     lg.setDefaultFilter('nearest','nearest')
     gs.registerEvents()
     buildNextLevel()
+    --gs.switch(splash.new())
     
     --tweening values
     globTweens = {}

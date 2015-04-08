@@ -437,6 +437,7 @@ function game:drawAndroid(noUI)
 end
 
 function game:startNextPhase()
+    if sys == "Android" then self.collected = nil end
     if self.collected == nil then
         tut.complete("rdanger")
         tut.complete("endturn")
@@ -487,8 +488,6 @@ function game:startNextPhase()
             self.phase = 0
             inputAccepted = true
         end
-    else
-        self.collected = nil
     end
 end
 
