@@ -721,3 +721,4 @@ _G["love"].run = function()
 
 end
 
+return _Debug

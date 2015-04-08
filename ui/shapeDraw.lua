@@ -89,13 +89,15 @@ function sd.drawBarAttackShape(list,map,unit)
 end
 
 function sd.drawMoveShape(list,map,jiggle)
+    local alpha = 80
+    if jiggle then alpha = 255 end
     for i,v in ipairs(list) do
-        lg.setColor(125,125,255)
+        lg.setColor(125,125,255,alpha)
         local x,y = grid.getCenter(map,v)
         local r = map.ts*0.4
         if jiggle then r = r * globTweens.jiggle.val end
         lg.circle("fill",x,y,r,20)
-        lg.setColor(30,30,255)
+        lg.setColor(30,30,255,alpha)
         lg.circle("line",x,y,r,20)
     end
 end

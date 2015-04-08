@@ -201,7 +201,9 @@ end
 
 --creates a canvas with a rounded rectangle rendered to it
 function t.td.roundedRectangle(r,w,h,side,border)
-    local bubble = lg.newCanvas()
+    w = math.pow(2, math.ceil(math.log(w)/math.log(2))-1);
+    h = math.pow(2, math.ceil(math.log(h)/math.log(2))-1);
+    local bubble = lg.newCanvas(w,h)
     lg.setColor(255,255,255)
 
     local s = {}
@@ -286,6 +288,7 @@ function t.td.adjustFontSize(text,width,maxLines,maxHeight)
 end
 
 function t.td.actionRectangle(w,h)
+    
     local bubble = lg.newCanvas()
     local edge = w/80
 
@@ -309,6 +312,8 @@ end
 --r,tw,th (pixels), side ("left","right","center"), text (string), face (image), border (bool)
 -- if not face given, bubble will be larger
 function t.td.drawBubble(r,tw,th,side,text,face,border)
+    tw = math.pow(2, math.ceil(math.log(tw)/math.log(2))-1);
+    th = math.pow(2, math.ceil(math.log(th)/math.log(2))-1);
     local bubble = lg.newCanvas(tw,th)
     lg.setColor(255,255,255)
     
@@ -326,9 +331,19 @@ function t.td.drawBubble(r,tw,th,side,text,face,border)
     end
     
 
-    local background = t.td.roundedRectangle(r,w,h,side,border)
+    --local background = t.td.roundedRectangle(r,w,h,side,false)
     lg.setCanvas(bubble)
-    lg.draw(background,ox,oy)
+    lg.setColor(30,30,30)
+    lg.rectangle("fill",0,0,tw,th)
+    lg.setColor(0,179,0)
+    lg.setLineWidth(7)
+    lg.rectangle("line",0,0,tw,th)
+    lg.setColor(0,0,0)
+    lg.setLineWidth(5)
+    lg.rectangle("line",0,0,tw,th)
+    --lg.draw(background,ox,oy)
+    
+    lg.setLineWidth(1)
 
     
     
@@ -369,7 +384,7 @@ function t.td.drawBubble(r,tw,th,side,text,face,border)
     if DEBUG_MODE then lg.setColor(0,255,0) lg.rectangle("line",tx,ty,tw,txh) lg.rectangle("line",0,0,bubble:getWidth(),bubble:getHeight()) end
     
     lg.setFont(t.td.adjustFontSize(text,tw,3,txh))
-    lg.setColor(colors.text)
+    lg.setColor(0,179,0)
     t.td.centreText(text,tx,ty,tw,txh,"center")
     
     

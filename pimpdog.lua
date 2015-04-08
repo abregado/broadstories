@@ -54,11 +54,13 @@ function pd.addToRegister(self,unit,force)
     end
 end
 
-function pd.draw(self,hoverCell)
+function pd.draw(self,hoverCell,collected)
     
     
     for i,v in ipairs(self.units) do
-        if v.cell == hoverCell then
+        if v == collected then
+            v:draw(nil,nil,false,true)
+        elseif v.cell == hoverCell then
             v:draw(nil,nil,true)
         else
             v:draw()
@@ -113,6 +115,7 @@ end
 
 function pd.takeUnit(self,cell)
     local obj = grid.takeObject(map,cell)
+    obj.lastCell = cell
     return obj
 end
 
@@ -151,7 +154,7 @@ function pd.doTeamAI(self,team)
     
     for i,v in ipairs(self.units) do
         if v.npc and v.team == team then
-            local tcell = v:ai(targetList)
+            local tcell = v:ai(targetList) or nil
             if tcell then
                 pd.moveUnit(self,v,tcell)
             end
@@ -312,6 +315,19 @@ function pd.findClosestEnemy(self,unit,x,y)
     for i,v in ipairs(self.units) do
         local dist = vl.dist(x,y,v.cell.pos.x,v.cell.pos.y)
         if dist < d and not (v == unit) and not (v.team == unit.team) then
+            d = dist
+            result = v
+        end
+    end
+    return result
+end
+
+function pd.findClosestUnitInPixels(self,x,y)
+    local result = nil
+    local d = 999999999999
+    for i,v in ipairs(self.units) do
+        local dist = vl.dist(x,y,v.x,v.y)
+        if dist < d then
             d = dist
             result = v
         end

@@ -32,7 +32,7 @@ function uic:update(dt)
     end
 end
 
-function uic:click(x,y,button)
+function uic:click(x,y)
     for i,v in ipairs(self.elements) do
         if v:check(x,y) then v:click() end
     end

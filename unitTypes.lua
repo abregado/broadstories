@@ -137,7 +137,7 @@ return {
             },
         cost = 3,
         weight = 5,
-        ai = function(self,targets) return d.pickFurthestAttack(self,targets) or d.moveTowardEnemy(self,targets) or d.avoidEnemy(self) end
+        ai = function(self,targets) return d.pickFurthestAttack(self,targets) or d.moveTowardEnemy(self,targets) or nil end
     },
     {
         class="Thief",

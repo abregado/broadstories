@@ -8,6 +8,7 @@ function d.new(controller,class,team)
     local o = {}
     o.map = controller.map
     o.cell = nil
+    o.lastCell = nil
     o.control = controller
     o.map = controller.map
     o.color = {math.random(0,255),math.random(0,255),math.random(0,255)}
@@ -157,14 +158,14 @@ function d.setCell(self,cell)
     
 end
 
-function d.draw(self,x,y,showStats)
+function d.draw(self,x,y,showStats,arrow)
     --x and y parameters are optional. omitting them will draw the object at its exact location
     local px,py = x or self.x,y or self.y
     local r = self.map.ts/2.5
     local offset = (self.map.ts/2)
     local scale = self.map.ts/self.control.spriteList[self.img]:getHeight()*0.75
 
-    if self.isDead == false and self.npc == true then
+    if inputAccepted and self.isDead == false and self.npc == true then
         if self.damage >= self.stats.armor then
             sd.drawDangerCircle(self.control.map,self.cell,{200, 30, 30})
             tut.complete("shapes")
@@ -191,6 +192,12 @@ function d.draw(self,x,y,showStats)
             d.drawArmor(self)
         end
     end
+    
+    if arrow then
+        lg.setColor(255,0,0)
+        lg.circle("fill",px,py-(self.map.ts/2)-(self.map.ts*globTweens.jiggle.val),self.map.ts/4,5)
+    end
+
 end
 
 function d.drawHits(self)
@@ -262,39 +269,43 @@ function d.drawArmor(self)
 end
 
 function d.moveTowardEnemy(self,targets)
-    local tcell = nil
-    local target = pimp.findClosestEnemyFromList(self.control,self,self.cell.pos.x,self.cell.pos.y,targets)
-    if target then
-        local options = grid.displaceList(self.map,self.moveShape,self.cell.pos.x,self.cell.pos.y)
-        options = grid.removeFullCells(options)
-        tcell = grid.getClosestFromList(options,target.cell.pos.x,target.cell.pos.y)
-        print(self.class,"moveTowardEnemy",tcell,target.class)
-        return tcell
+    if #targets > 0 then
+        local tcell = nil
+        local target = pimp.findClosestEnemyFromList(self.control,self,self.cell.pos.x,self.cell.pos.y,targets)
+        if target then
+            local options = grid.displaceList(self.map,self.moveShape,self.cell.pos.x,self.cell.pos.y)
+            options = grid.removeFullCells(options)
+            tcell = grid.getClosestFromList(options,target.cell.pos.x,target.cell.pos.y)
+            --print(self.class,"moveTowardEnemy",tcell,target.class)
+            return tcell
+        end
     end
-    print(self.class,"moveTowardEnemy: No target found")
+    --print(self.class,"moveTowardEnemy: No target found")
     return nil
 end
 
 function d.moveTowardWeakestEnemy(self,targets)
-    local tcell = nil
-    local target = nil
-    local lowArmor = 10
-    for i,v in ipairs(targets) do
-        if v.stats.armor < lowArmor then
-            target = v
-            lowArmor = v.stats.armor
+    if #targets > 0 then
+        local tcell = nil
+        local target = nil
+        local lowArmor = 10
+        for i,v in ipairs(targets) do
+            if v.stats.armor < lowArmor then
+                target = v
+                lowArmor = v.stats.armor
+            end
+        end
+        --print(target.class or "No Target Found",#targets,"targets given")
+        
+        if target then
+            local options = grid.displaceList(self.map,self.moveShape,self.cell.pos.x,self.cell.pos.y)
+            options = grid.removeFullCells(options)
+            tcell = grid.getClosestFromList(options,target.cell.pos.x,target.cell.pos.y)
+            --print(self.class,"moveTowardWeakestEnemy",tcell,target.class)
+            return tcell
         end
     end
-    --print(target.class or "No Target Found",#targets,"targets given")
-    
-    if target then
-        local options = grid.displaceList(self.map,self.moveShape,self.cell.pos.x,self.cell.pos.y)
-        options = grid.removeFullCells(options)
-        tcell = grid.getClosestFromList(options,target.cell.pos.x,target.cell.pos.y)
-        print(self.class,"moveTowardWeakestEnemy",tcell,target.class)
-        return tcell
-    end
-    print(self.class,"moveTowardWeakestEnemy: No target found")
+    --print(self.class,"moveTowardWeakestEnemy: No target found")
     return nil
 end
 
@@ -315,32 +326,36 @@ end
 function d.pickRandomAttack(self)
     local attackSquares = pimp.findAttackSquares(self.control,self)
     local cell = grid.pickRandomCell(attackSquares)
-    print(self.class,"pickRandomAttack",cell)
+    --print(self.class,"pickRandomAttack",cell)
     return cell
 end
 
 function d.pickFurthestAttack(self,targets)
-    local target = pimp.findClosestEnemyFromList(self.control,self,self.cell.pos.x,self.cell.pos.y,targets)
-    if target then
-        local attackSquares = pimp.findAttackSquares(self.control,self)
-        local cell = grid.getFurthestFromList(attackSquares,target.cell.pos.x,target.cell.pos.y)
-        print(self.class,"pickFurthestAttack",cell)
-        return cell
+    if #targets > 0 then
+        local target = pimp.findClosestEnemyFromList(self.control,self,self.cell.pos.x,self.cell.pos.y,targets)
+        if target then
+            local attackSquares = pimp.findAttackSquares(self.control,self)
+            local cell = grid.getFurthestFromList(attackSquares,target.cell.pos.x,target.cell.pos.y)
+            --print(self.class,"pickFurthestAttack",cell)
+            return cell
+        end
     end
-    print(self.class,"pickFurthestAttack",nil)
+    --print(self.class,"pickFurthestAttack",nil)
     return nil
 end
 
 function d.pickClosestAttack(self,targets)
-    local target = pimp.findClosestEnemyFromList(self.control,self,self.cell.pos.x,self.cell.pos.y,targets)
-    if target then
-        local attackSquares = pimp.findAttackSquares(self.control,self)
-        
-        local cell = grid.getClosestFromList(attackSquares,target.cell.pos.x,target.cell.pos.y)
-        print(self.class,"pickClosestAttack",cell)
-        return cell
+    if #targets > 0 then
+        local target = pimp.findClosestEnemyFromList(self.control,self,self.cell.pos.x,self.cell.pos.y,targets)
+        if target then
+            local attackSquares = pimp.findAttackSquares(self.control,self)
+            
+            local cell = grid.getClosestFromList(attackSquares,target.cell.pos.x,target.cell.pos.y)
+            --print(self.class,"pickClosestAttack",cell)
+            return cell
+        end
     end
-    print(self.class,"pickClosestAttack",nil)
+    --print(self.class,"pickClosestAttack",nil)
     return nil
 end
 
@@ -354,32 +369,33 @@ function d.unitIsInList(unit,list)
 end
 
 function d.pickMostCombos(self,targets)
-    local results = {}
-    local topY = 99
-    --print("pick most combos",#targets,"targets given")
-    for i,moveOption in ipairs(self.moves) do
-        local attackSquares = grid.displaceList(self.control.map,self.attackShape,moveOption.pos.x,moveOption.pos.y)
-        local count = 0
-        for index,square in ipairs(attackSquares) do
-            if square.obj and d.unitIsInList(square.obj,targets) then
-                print(square.obj.class)
-                count = count +1
+    if #targets > 0 then
+        local results = {}
+        --print("pick most combos",#targets,"targets given")
+        for i,moveOption in ipairs(self.moves) do
+            local attackSquares = grid.displaceList(self.control.map,self.attackShape,moveOption.pos.x,moveOption.pos.y)
+            local count = 0
+            for j,v in ipairs(attackSquares) do
+                if v.obj and d.unitIsInList(v.obj,targets) then
+                    --print(v.obj.class)
+                    count = count +1
+                end
             end
-            if square.pos.y < topY then topY = square.pos.y end
-        end
-        --print("counting moveOption",i," out of ",#self.moves,":",count,"targets out of",#attackSquares,"squares")
-        table.insert(results,{cell=moveOption,count=count})
-    end
-    
-    local topCount = {cell=nil,count = 0}
-    for i,v in ipairs(results) do
-        if v.count > topCount.count then
-            topCount = {cell=v.cell,count = v.count}
+            --print("counting moveOption",i," out of ",#self.moves,":",count,"targets out of",#attackSquares,"squares")
+            table.insert(results,{cell=moveOption,count=count})
         end
         
+        local topCount = {cell=nil,count = 0}
+        for i,v in ipairs(results) do
+            if v.count > topCount.count then
+                topCount = {cell=v.cell,count = v.count}
+            end
+            
+        end
+        --print(self.class,"pickMostCombos",topCount.cell)
+        return topCount.cell
     end
-    print(self.class,"pickMostCombos",topCount.cell)
-    return topCount.cell
+    return nil
 end
 
 return d

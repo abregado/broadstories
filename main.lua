@@ -1,5 +1,5 @@
 DEBUG_MODE = false
-if DEBUG_MODE then require ('lovedebug') end
+if DEBUG_MODE then bugger = require ('lovedebug') end
 gs = require('hump-master/gamestate') 
 
 lg = love.graphics
@@ -25,6 +25,8 @@ modloader = require('modloader')
 
 PLAYERTEAM = 1
 ENEMYTEAM = 2
+
+info = true
 
 
 unitImg = {}
@@ -94,6 +96,8 @@ levelProg = 1
 wins = 0
 losses = 0
 
+sys = nil
+
 
 --[[
 #############TODOS###############
@@ -124,7 +128,7 @@ win/lose conditions
 
 
 function love.load(args)
-    local sys = love.system.getOS()
+    sys = love.system.getOS()
     if not sys == "Android" then
         local FSmodes = love.window.getFullscreenModes(1)
         local highMode = FSmodes[1]
