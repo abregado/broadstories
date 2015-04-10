@@ -1,7 +1,7 @@
 local lg = love.graphics
 
 local td = {}
-local font = lg.newFont(20)
+local font = lg.newFont('/assets/Quattrocento-Regular.ttf',20)
 
 local colors = {}
 colors.bg = {225,225,255}

@@ -9,9 +9,11 @@ colors.ui.border = {0,0,0}
 colors.ui.bg = {60,60,60}
 colors.ui.bghover = {30,30,30}
 
+local font = lg.newFont("/assets/ccaps.ttf",20)
+
 local ibutton = {}
 
-function ibutton.new(xin,yin,control,icon,ready,w,h,lowBorder)
+function ibutton.new(xin,yin,control,icon,text,ready,w,h,lowBorder)
 	local o = {}
 	o.x = xin
 	o.y = yin
@@ -20,9 +22,11 @@ function ibutton.new(xin,yin,control,icon,ready,w,h,lowBorder)
 	o.control = control
 	o.hover = 18
     o.lowBorder = lowBorder
+    o.text = text
+    o.active = true
+    o.font = font
 	
 	o.ready = ready or false
-    o.active = true
 	o.icon = icon
 	
 	o.click = ibutton.click
@@ -55,6 +59,7 @@ function ibutton:update(dt)
 end
 
 function ibutton:draw(alpha)
+    local font = self.font
 	lg.setColor(colors.ui.border[1],colors.ui.border[2],colors.ui.border[3],alpha or 255)
 	lg.rectangle("fill",self.x,self.y,self.w,self.h)
     
@@ -76,13 +81,17 @@ function ibutton:draw(alpha)
 		lg.setColor(colors.but.locked[1],colors.but.locked[2],colors.but.locked[3],alpha or 255)
 	end
 	
-    local scale = self.h/self.icon:getHeight()
+    local scale = self.h/self.icon:getHeight()*1.5
     if scale > 1 then scale = 1 end
     
-    local iconX = (self.w/2)-(self.icon:getWidth()/2)*scale
+    local iconX = (self.w/20)
     local iconY = (self.h/2)-(self.icon:getHeight()/2)*scale
     
 	lg.draw(self.icon,self.x+iconX,self.y+iconY,0,scale,scale)
+    
+    local toy = font:getHeight(self.text)/2
+    lg.setFont(font)
+    lg.print(self.text,self.x+(iconX*1.5)+(self.icon:getWidth()*scale),self.y+(self.h/2)-toy)
 
 end
 

@@ -8,8 +8,11 @@ tut = require('tutorial')
 td = tut.td
 game = require('state_game')
 trans = require('state_trans')
+splash = require('state_splash')
+menu = require('state_menu')
 lgen = require('levgen')
 vl= require('hump-master/vector-light')
+sb = require('speechbubble')
 grid = require('grid')
 pimp = require('pimpdog')
 unitTypes = require('unitTypes')
@@ -71,6 +74,14 @@ img.retreat = lg.newImage('/assets/retreat.png')
 img.cog = lg.newImage('/assets/settings.png')
 img.flag = lg.newImage('/assets/flag2.png')
 img.book = lg.newImage('/assets/book.png')
+img.build = lg.newImage('/assets/build.png')
+img.teleport = lg.newImage('/assets/teleport.png')
+img.disk = lg.newImage('/assets/load.png')
+
+
+img.binary = lg.newImage('/assets/bgsplashlogo.png')
+img.dragon = lg.newImage('/assets/bs-invert-dragon-small.png')
+img.broadstories = lg.newImage('/assets/bs-invert-small.png')
 
 
 levels = {}
@@ -92,7 +103,7 @@ anims.stand = a8.newAnimation(sheet.sample(3,1),1)
 anims.walk = a8.newAnimation(sheet.sample('3-4',1),0.3)
 
 threatLevel = 0
-levelProg = 1
+levelProg = 0
 wins = 0
 losses = 0
 
@@ -140,14 +151,15 @@ function love.load(args)
     if args then
         for i,v in ipairs(args) do
             print (v)
-            
+
             if v == "--fs" or v == "--fullscreen" then toggleFullscreen() end 
         end
     end
     lg.setDefaultFilter('nearest','nearest')
     gs.registerEvents()
     buildNextLevel()
-    --gs.switch(splash.new())
+    
+    sb.setColors({border={220,90,90},text={220,90,90}})
     
     --tweening values
     globTweens = {}
@@ -207,14 +219,41 @@ function love.quit()
 end
 
 function buildNextLevel()
-    if levels[levelProg] then
+    if levelProg == 0 then
+        loadSplashScreen()
+    elseif levels[levelProg] then
         gs.switch(importer.import(levels[levelProg],unitTypes,unitImg))
     else
         gs.switch(game.new())
     end
 end
 
+function loadSplashScreen()
+    local dx,dy = (lg.getWidth()/2)-(img.broadstories:getWidth()/2),(lg.getHeight()/2)-(img.broadstories:getHeight()/2)
+    local bx,by = (lg.getWidth()/2)-(img.binary:getWidth()/2),(lg.getHeight()/2)-(img.binary:getHeight()/2)
 
+    
+    gs.switch(splash.new({
+        aa.new({splash.newQuadFlyIn(img.binary,bx,by,1)}),
+        aa.new({splash.newImageDisplay(img.binary,bx,by,2)}),
+        aa.new({splash.newQuadFlyOut(img.binary,bx,by,1)}),
+        aa.new({
+            splash.newImageDisplay(img.dragon,dx,dy,2)
+            }),
+        aa.new({
+            splash.newImageDisplay(img.dragon,dx,dy,2),
+            splash.newImageFadeIn(img.broadstories,dx,dy,1)
+            }),
+        aa.new({
+            splash.newImageDisplay(img.broadstories,dx,dy,1)
+            }),
+        aa.new({splash.newImageFadeOut(img.broadstories,dx,dy,0.5)})
+        }))
+end
+
+function loadMenu()
+    gs.switch(menu.new())
+end
 
 
 

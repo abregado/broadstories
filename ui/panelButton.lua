@@ -5,9 +5,9 @@ local colors = {but={},ui={}}
 colors.but.hover = {220,90,90}
 colors.but.ready = {255,255,255}
 colors.but.locked = {0,0,0}
-colors.ui.border = {0,0,0}
-colors.ui.bg = {60,60,60}
-colors.ui.bghover = {30,30,30}
+colors.ui.border = {30,30,30}
+colors.ui.bg = {80,80,80}
+colors.ui.bghover = {90,90,90}
 
 local ibutton = {}
 
@@ -59,15 +59,16 @@ function ibutton:draw(alpha)
 	lg.rectangle("fill",self.x,self.y,self.w,self.h)
     
     if self:check(lm.getX(),lm.getY()) and self.ready then -- select coloration of the icon
-		lg.setColor(colors.ui.bghover[1],colors.ui.bghover[2],colors.ui.bghover[3],alpha or 255)
+		lg.setColor(colors.but.hover[1],colors.but.hover[2],colors.but.hover[3],alpha or 255)
 	else
 		lg.setColor(colors.ui.bg[1],colors.ui.bg[2],colors.ui.bg[3],alpha or 255)
 	end
     
-    local border = 0.2 * self.h
-    if self.lowBorder then border = 0.02 * self.h end
-	lg.rectangle("fill",self.x+border,self.y+border,self.w-(border*2),self.h-(border*2))
-	
+    local border = 0.04 * self.h
+    lg.setLineWidth(3)
+	lg.rectangle("line",self.x+border,self.y+border,self.w-(border*2),self.h-(border*2))
+	lg.setLineWidth(1)
+    
 	if self:check(lm.getX(),lm.getY()) and self.ready then -- select coloration of the icon
 		lg.setColor(colors.but.hover[1],colors.but.hover[2],colors.but.hover[3],alpha or 255)
 	elseif self.ready then
@@ -76,13 +77,15 @@ function ibutton:draw(alpha)
 		lg.setColor(colors.but.locked[1],colors.but.locked[2],colors.but.locked[3],alpha or 255)
 	end
 	
-    local scale = self.h/self.icon:getHeight()
+    local scale = self.h/self.icon:getHeight()*.9
     if scale > 1 then scale = 1 end
     
     local iconX = (self.w/2)-(self.icon:getWidth()/2)*scale
     local iconY = (self.h/2)-(self.icon:getHeight()/2)*scale
     
+    lg.setBlendMode('screen')
 	lg.draw(self.icon,self.x+iconX,self.y+iconY,0,scale,scale)
+    lg.setBlendMode('alpha')
 
 end
 

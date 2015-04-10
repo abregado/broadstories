@@ -18,6 +18,8 @@ end
 function ml.loadUnits(unitTypes)
     print("loading mods units")
     local files = fs.getDirectoryItems('modunits')
+    local newUnits = 0
+    local changedUnits = 0
     for i,v in ipairs(files) do
         print(v)
         local filename, ext = ml.getBasenameAndExtension(v)
@@ -31,9 +33,11 @@ function ml.loadUnits(unitTypes)
                         if exists then 
                             unitTypes[exists] = unit
                             print(unit.class.." already exists, updating source copy") 
+                            changedUnits = changedUnits +1
                         else
                             ml.addUnitType(unit,unitTypes)
                             print(unit.class.." does not exist and is valid. Adding to unit types")
+                            newUnits = newUnits+1
                         end
                     else
                         print("entry was not a valid unit structure")
@@ -44,6 +48,7 @@ function ml.loadUnits(unitTypes)
             end
         end
     end
+    return newUnits,changedUnits
 end
 
 function ml.addUnitType(unit,unitTypes)
@@ -81,6 +86,7 @@ end
 function ml.loadLevels(levelList)
     print("loading mod levels")
     local files = fs.getDirectoryItems('modlevels')
+    local newLevels = 0
     for i,v in ipairs(files) do
         print(v)
         local filename, ext = ml.getBasenameAndExtension(v)
@@ -99,6 +105,7 @@ function ml.loadLevels(levelList)
             end
         end
     end
+    return newLevels
 end
 
 function ml.checkLevelStructure(level)

@@ -139,16 +139,16 @@ end
 
 
 t.td = {}
-local font = lg.newFont(20)
+local font = lg.newFont('/assets/Quattrocento-Regular.ttf',20)
 
 local colors = {}
 colors.bg = {30,30,30}
-colors.text = {0,255,0}
-colors.border = {60,225,60}
+colors.text = {220,125,125}
+colors.border = {220,90,90}
 colors.circInd = {255,255,0}
 colors.arrow = {255,0,0}
 
-fontFile = nil
+fontFile = '/assets/Quattrocento-Regular.ttf'
 
 
 --prints text centered at the given x/y
@@ -333,12 +333,12 @@ function t.td.drawBubble(r,tw,th,side,text,face,border)
 
     --local background = t.td.roundedRectangle(r,w,h,side,false)
     lg.setCanvas(bubble)
-    lg.setColor(30,30,30)
+    lg.setColor(colors.bg)
     lg.rectangle("fill",0,0,tw,th)
-    lg.setColor(0,179,0)
+    lg.setColor(colors.border)
     lg.setLineWidth(7)
     lg.rectangle("line",0,0,tw,th)
-    lg.setColor(0,0,0)
+    lg.setColor(colors.border)
     lg.setLineWidth(5)
     lg.rectangle("line",0,0,tw,th)
     --lg.draw(background,ox,oy)
@@ -384,7 +384,7 @@ function t.td.drawBubble(r,tw,th,side,text,face,border)
     if DEBUG_MODE then lg.setColor(0,255,0) lg.rectangle("line",tx,ty,tw,txh) lg.rectangle("line",0,0,bubble:getWidth(),bubble:getHeight()) end
     
     lg.setFont(t.td.adjustFontSize(text,tw,3,txh))
-    lg.setColor(0,179,0)
+    lg.setColor(colors.text)
     t.td.centreText(text,tx,ty,tw,txh,"center")
     
     

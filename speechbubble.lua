@@ -8,13 +8,13 @@
 local sb = {}
 
 local lg = love.graphics
-local bubbleFont = lg.newFont(40)
+local bubbleFont = lg.newFont('/assets/Quattrocento-Regular.ttf',40)
 
 sb.colors = {}
 sb.colors.bg = {225,225,255}
 sb.colors.text = {0,0,0}
 sb.colors.border = {125,125,200}
-sb.fontFile = nil
+sb.fontFile = '/assets/Quattrocento-Regular.ttf'
 
 --to set the bubble colors, supply table colorList which includes variables bg and/or text (of type love.Color)
 function sb.setColors(colorList)
@@ -197,17 +197,16 @@ function sb.drawBubble(r,tw,th,side,text,face,border)
     
     if DEBUG_MODE then lg.setColor(0,255,0) lg.rectangle("line",tx,ty,tw,txh) lg.rectangle("line",0,0,bubble:getWidth(),bubble:getHeight()) end
     
-    lg.setFont(sb.adjustFontSize(text,tw,3,txh))
+    local font = sb.adjustFontSize(text,tw,3,txh)
     lg.setColor(sb.colors.text)
-    sb.centreText(text,tx,ty,tw,txh,"center")
+    sb.centreText(text,tx,ty,tw,txh,"center",font)
     
     
     lg.setCanvas()
     return bubble
 end
 
-function sb.centreText(text,x,y,w,h,align)
-    local font = lg.getFont()
+function sb.centreText(text,x,y,w,h,align,font)
     lg.setColor(sb.colors.text)
     local actualWidth, lines = font:getWrap(text,w)
     local tox = actualWidth/2

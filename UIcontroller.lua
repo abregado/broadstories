@@ -1,11 +1,12 @@
 local uic = {}
 
-function uic.new(state)
+function uic.new(state,font)
     local o = {}
     
     o.state = state
     o.elements = {}
     o.mouseDown = false
+    o.font = font
     
     o.draw = uic.draw
     o.update = uic.update
@@ -16,26 +17,30 @@ function uic.new(state)
 end
 
 function uic:addElement(element)
+    element.font = self.font
     table.insert(self.elements,element)
     
 end
 
-function uic:draw()
+function uic:draw(alpha)
     for i,v in ipairs(self.elements) do
-        v:draw()
+        if v.active then v:draw(alpha) end
     end
 end
 
 function uic:update(dt)
     for i,v in ipairs(self.elements) do
-        v:update(dt)
+        if v.active then v:update(dt) end
     end
 end
 
 function uic:click(x,y)
+    local clickedItem = nil
     for i,v in ipairs(self.elements) do
-        if v:check(x,y) then v:click() end
+        if v.active and v:check(x,y) then clickedItem = v end
     end
+    if clickedItem then clickedItem:click() end
+    return clickedItem
 end
 
 

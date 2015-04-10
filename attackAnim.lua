@@ -1,7 +1,7 @@
 local vl = require('hump-master/vector-light')
 
-local flyupFont = lg.newFont("/assets/ccaps.ttf",40)
-local underbarFont = lg.newFont("/assets/ccaps.ttf",20)
+local flyupFont = lg.newFont('/assets/Quattrocento-Regular.ttf',40)
+local underbarFont = lg.newFont('/assets/Quattrocento-Regular.ttf',20)
 local barColor = {255,255,255}
 local fontColor = {0,0,0}
 
@@ -163,9 +163,10 @@ function aa.draw(self)
     end
 end
 
-function aa.newToasterCome(text)
+function aa.newToasterCome(text,font)
     local o = {}
     o.draw = function(self)
+        local flyupFont = font or flyupFont
         
         local fontHeight = flyupFont:getHeight(self.text)
         local fontWidth = flyupFont:getWidth(self.text)
@@ -186,9 +187,10 @@ function aa.newToasterCome(text)
     return o
 end
 
-function aa.newToasterWait(text,wait)
+function aa.newToasterWait(text,wait,font)
     local o = {}
     o.draw = function(self)
+        local flyupFont = font or flyupFont
         
         local fontHeight = flyupFont:getHeight(self.text)
         local fontWidth = flyupFont:getWidth(self.text)
@@ -210,9 +212,11 @@ function aa.newToasterWait(text,wait)
     return o
 end
 
-function aa.newToasterGo(text)
+function aa.newToasterGo(text,font)
     local o = {}
     o.draw = function(self)
+        
+        local flyupFont = font or flyupFont
         
         local fontHeight = flyupFont:getHeight(self.text)
         local fontWidth = flyupFont:getWidth(self.text)
