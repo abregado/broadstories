@@ -22,6 +22,9 @@ function game.new(map,control,tutorial)
         state.control = pimp.new(state.map,unitTypes,unitImg)
     end
     
+    state.interacted = false
+    state.touched = false
+    
     state.lastTouch = {x=0,y=0}
     
     state.ui = uicon.new(state)
@@ -32,17 +35,20 @@ function game.new(map,control,tutorial)
 
     
     local etbut = ibut.new(lg:getWidth()-(buttonHeight*1.5),0,state.ui,img.endturn,true,buttonHeight*1.5,buttonHeight)
-    local sbut = ibut.new(4+(buttonHeight*1.5),0,state.ui,img.book,true,buttonHeight*1.5,buttonHeight)
+    local sbut = ibut.new(8+(buttonHeight*3),0,state.ui,img.book,true,buttonHeight*1.5,buttonHeight)
     local rbut = ibut.new(0,0,state.ui,img.flag,true,buttonHeight*1.5,buttonHeight)
+    local mbut = ibut.new(4+(buttonHeight*1.5),0,state.ui,img.retreat,true,buttonHeight*1.5,buttonHeight)
 
     rbut.click = function() state:triggerRestart() end
     etbut.click = function() state:startNextPhase() end
     sbut.click = function() state:triggerSkip() end
+    mbut.click = function() loadMenu() end
     state.ui:addElement(etbut)
     state.ui:addElement(rbut)
+    state.ui:addElement(mbut)
     
     if DEBUG_MODE then
-        local dbut = ibut.new(4+(buttonHeight*3),0,state.ui,img.cog,true,buttonHeight*1.5,buttonHeight)
+        local dbut = ibut.new(12+(buttonHeight*4.5),0,state.ui,img.cog,true,buttonHeight*1.5,buttonHeight)
         dbut.click = function() print("clicked debug button") bugger.drawOverlay = not bugger.drawOverlay end
         state.ui:addElement(dbut)
     end
@@ -81,15 +87,33 @@ function game.new(map,control,tutorial)
         print('populated by default')
     end
     
+    local s1={
+        w=lg.getWidth()/3*2,
+        h=lg.getHeight()/5
+        }
     
+    local p1={
+        x=lg.getWidth()/6,
+        y=lg.getHeight()/4*3
+        }
+        
+    local s2={
+        w=lg.getWidth()-40,
+        h=lg.getHeight()/5
+        }
+    
+    local p2={
+        x=20,
+        y=(lg.getHeight()/5*4)-20
+        }
     
     inputAccepted = true
     
     tut.clearTuts()
     if levelProg < 7 then
-        game.setupTuts[levelProg](state.control.units[1],etbut,sbut,rbut)
+        game.setupTuts[levelProg](state.control.units[1],etbut,sbut,rbut,s1,p1,s2,p2)
     elseif levelProg == #levels+1 then
-        game.setupTuts[7](state.control.units[1],etbut,sbut,rbut)
+        game.setupTuts[7](state.control.units[1],etbut,sbut,rbut,s1,p1,s2,p2)
     end
     
     return state
@@ -97,125 +121,178 @@ end
 
 game.setupTuts = {}
 
-game.setupTuts[1] = function (hero,etbutton,sbutton,rbutton)
+game.setupTuts[1] = function (hero,etbutton,sbutton,rbutton,s1,p1)
     td = tut.td
     
-    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5*1.1,"center","Welcome to the Broadstories Prototype. Please play through this short tutorial to learn how to play the game.",nil,false)
-    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","You can skip any tutorial level by clicking this button.",nil,false)
-    local intro3 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","You can give up and retry any level by pressing this button.",nil,false)
-    local selectDude = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Click on your Fighter Hero with the left mouse button.",nil,false)
-    local moveDude = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Click on one of the blue circles with the left mouse button to move your Fighter Hero.",nil,false)
-    local endTurn = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Now, end your turn by pressing this button.",nil,false)
-    local shapes = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5*1.1,"center","The red area shows where your Fighter Hero can attack. Try placing the Hero so the red shape overlaps the Thief's position.",nil,false)
-    local attack = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Good! Now end the turn and your Fighter Hero will attack automatically.",nil,false)
-    local deselect = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Tap anywhere else to deselect your Hero.",nil,true)
+    
+    
+    
+    local intro = td.drawBubble(5,s1.w,s1.h*1.1,"center","Welcome to the Broadstories Prototype. Please play through this short tutorial to learn how to play the game.",nil,false)
+    local intro2 = td.drawBubble(5,s1.w,s1.h,"center","You can skip any tutorial level by clicking this button.",nil,false)
+    local intro3 = td.drawBubble(5,s1.w,s1.h,"center","You can give up and retry any level by pressing this button.",nil,false)
+    local selectDude = td.drawBubble(5,s1.w,s1.h,"center","Click on your Fighter Hero with the left mouse button.",nil,false)
+    local moveDude = td.drawBubble(5,s1.w,s1.h,"center","Click on one of the blue circles with the left mouse button to move your Fighter Hero.",nil,false)
+    local endTurn = td.drawBubble(5,s1.w,s1.h,"center","Now, end your turn by pressing this button.",nil,false)
+    local shapes = td.drawBubble(5,s1.w,s1.h*1.1,"center","The red area shows where your Fighter Hero can attack. Try placing the Hero so the red shape overlaps the Thief's position.",nil,false)
+    local attack = td.drawBubble(5,s1.w,s1.h,"center","Good! Now end the turn and your Fighter Hero will attack automatically.",nil,false)
+    local deselect = td.drawBubble(5,s1.w,s1.h,"center","Tap anywhere else to deselect your Hero.",nil,true)
     
     
     if sys == "Android" then
-        intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","You can skip any tutorial level by tapping this button.",nil,true)
-        intro3 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","You can give up and retry any level by tapping this button.",nil,true)
-        selectDude = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Tap on your Fighter Hero to move it.",nil,true)
-        moveDude = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Select one of the blue circles to move your Fighter Hero.",nil,true)
+        intro2 = td.drawBubble(5,s1.w,s1.h,"center","You can skip any tutorial level by tapping this button.",nil,true)
+        intro3 = td.drawBubble(5,s1.w,s1.h,"center","You can give up and retry any level by tapping this button.",nil,true)
+        selectDude = td.drawBubble(5,s1.w,s1.h,"center","Tap on your Fighter Hero to move it.",nil,true)
+        moveDude = td.drawBubble(5,s1.w,s1.h,"center","Select one of the blue circles to move your Fighter Hero.",nil,true)
     end
     
-    tut.addSlide("intro","intro2","Introduction Slide",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("intro","intro2","Introduction Slide",true,function() 
+        lg.draw(intro,p1.x,p1.y)
+        td.continueButton(p1.x+s1.w,p1.y+s1.h,globTweens.jiggle.val*2)
+        end)
     tut.addSlide("intro2","intro3","Introduction Slide",true,function() 
-        lg.draw(intro2,sbutton.x+(sbutton.w/2),(sbutton.y+sbutton.h)*1.1) 
+        lg.draw(intro2,sbutton.x+(sbutton.w/2),(sbutton.y+sbutton.h)*1.1)
+        td.continueButton(sbutton.x+(sbutton.w/2)+s1.w,(sbutton.y+sbutton.h)*1.1+s1.h,globTweens.jiggle.val*2) 
         lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",sbutton.x,sbutton.y,sbutton.w,sbutton.h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
     tut.addSlide("intro3","select","Introduction Slide",true,function()
         lg.draw(intro3,rbutton.x+(rbutton.w/2),(rbutton.y+rbutton.h)*1.1) 
+        td.continueButton(rbutton.x+(rbutton.w/2)+s1.w,(rbutton.y+rbutton.h)*1.1+s1.h,globTweens.jiggle.val*2) 
         lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",rbutton.x,rbutton.y,rbutton.w,rbutton.h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
-    tut.addSlide("select","move","Select a Dude Slide",true,function() lg.draw(selectDude,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("select","move","Select a Dude Slide",true,function() 
+        lg.draw(selectDude,p1.x,p1.y) 
+        td.continueButton(hero.x,hero.y,globTweens.jiggle.val) 
+        end)
     
     if sys == "Android" then
-        tut.addSlide("move","deselect","Move a Dude Slide",true,function() lg.draw(moveDude,lg.getWidth()/6,lg.getHeight()/4*3) end)
-        tut.addSlide("deselect","endturn","Move a Dude Slide",true,function() lg.draw(deselect,lg.getWidth()/6,lg.getHeight()/4*3) end)
+        tut.addSlide("move","deselect","Move a Dude Slide",true,function() lg.draw(moveDude,p1.x,p1.y) end)
+        tut.addSlide("deselect","endturn","Move a Dude Slide",true,function() lg.draw(deselect,p1.x,p1.y) end)
     else
-        tut.addSlide("move","endturn","Move a Dude Slide",true,function() lg.draw(moveDude,lg.getWidth()/6,lg.getHeight()/4*3) end)
+        tut.addSlide("move","endturn","Move a Dude Slide",true,function() lg.draw(moveDude,p1.x,p1.y) end)
     end
     
     tut.addSlide("endturn","shapes","End your turn",true,function() 
-        lg.draw(endTurn,etbutton.x+(etbutton.w/2)-(endTurn:getWidth()),(sbutton.y+sbutton.h)*1.1) 
-        lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",etbutton.x,etbutton.y,etbutton.w,etbutton.h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
-    tut.addSlide("shapes","attack","Attackshapes",false,function() lg.draw(shapes,lg.getWidth()/6,lg.getHeight()/4*3) end)
+        lg.draw(endTurn,etbutton.x+(etbutton.w/2)-s1.w,(sbutton.y+sbutton.h)*1.1) 
+        local x,y = etbutton.x+(10*globTweens.jiggle.val), etbutton.y+(10*globTweens.jiggle.val)
+        local w,h = etbutton.w-(20*globTweens.jiggle.val), etbutton.h-(20*globTweens.jiggle.val)
+        lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",x,y,w,h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
+    tut.addSlide("shapes","attack","Attackshapes",false,function() lg.draw(shapes,p1.x,p1.y) end)
     tut.addSlide("attack",nil,"End your turn",true,function() 
-        lg.draw(attack,etbutton.x+(etbutton.w/2)-(lg.getWidth()/3*2),(sbutton.y+sbutton.h)*1.1)
-        lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",etbutton.x,etbutton.y,etbutton.w,etbutton.h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
+        lg.draw(attack,etbutton.x+(etbutton.w/2)-(s1.w),(sbutton.y+sbutton.h)*1.1)
+        local x,y = etbutton.x+(10*globTweens.jiggle.val), etbutton.y+(10*globTweens.jiggle.val)
+        local w,h = etbutton.w-(20*globTweens.jiggle.val), etbutton.h-(20*globTweens.jiggle.val)
+        lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",x,y,w,h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
     
-    
     tut.prepare("intro")
 end
 
-game.setupTuts[2] = function (hero,etbutton,sbutton,rbutton)
+game.setupTuts[2] = function (hero,etbutton,sbutton,rbutton,s1,p1)
     td = tut.td
-    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Meet the Ranger Hero. This Hero has a long range attack but is not very effective at close range.",nil,true)
-    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","The enemy on this level is tougher. Victory will require both your Heroes to work together.",nil,true)
-    local ydanger = td.drawBubble(5,lg.getWidth()/5*3*1.5,lg.getHeight()/5*1.2,"center","The yellow circle around the enemy's feet shows that it is under attack but its armor will negate the damage. Move a second Hero to an attack position.",nil,true)
-    local rdanger = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Good! The circle has changed to red. Now end your turn and let your Heroes attack.",nil,true)
+    local intro = td.drawBubble(5,s1.w,s1.h,"center","Meet the Ranger Hero. This Hero has a long range attack but is not very effective at close range.",nil,true)
+    local intro2 = td.drawBubble(5,s1.w,s1.h,"center","The enemy on this level is tougher. Victory will require both your Heroes to work together.",nil,true)
+    local ydanger = td.drawBubble(5,lg.getWidth()/5*3*1.5,s1.h*1.2,"center","The yellow circle around the enemy's feet shows that it is under attack but its armor will negate the damage. Move a second Hero to an attack position.",nil,true)
+    local rdanger = td.drawBubble(5,s1.w,s1.h,"center","Good! The circle has changed to red. This enemy will be damaged by your attack. Now end your turn.",nil,true)
    
-    tut.addSlide("intro","intro2","Ranger Intro",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4*3) end)
-    tut.addSlide("intro2","ydanger","Toughguy",true,function() lg.draw(intro2,lg.getWidth()/6,lg.getHeight()/4) end)
-    tut.addSlide("ydanger","rdanger","yellow danger",false,function() lg.draw(ydanger,10,lg.getHeight()/2) end)
-    tut.addSlide("rdanger",nil,"red danger",false,function() lg.draw(rdanger,etbutton.x+(etbutton.w/2)-(lg.getWidth()/3*2),(sbutton.y+sbutton.h)*1.1) lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",etbutton.x,etbutton.y,etbutton.w,etbutton.h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
+    tut.addSlide("intro","intro2","Ranger Intro",true,function() 
+        lg.draw(intro,p1.x,p1.y) 
+        td.continueButton(p1.x+s1.w,p1.y+s1.h,globTweens.jiggle.val*2)
+        end)
+    tut.addSlide("intro2","ydanger","Toughguy",true,function() 
+        lg.draw(intro2,lg.getWidth()/6,lg.getHeight()/4) 
+        td.continueButton((lg.getWidth()/6)+s1.w,(lg.getHeight()/4)+s1.h,globTweens.jiggle.val*2)
+        end)
+    tut.addSlide("ydanger","rdanger","yellow danger",false,function() 
+        lg.draw(ydanger,10,10) 
+        --td.continueButton(10+s1.w,10+s1.h,globTweens.jiggle.val*2)
+        end)
+    tut.addSlide("rdanger",nil,"red danger",false,function() 
+        lg.draw(rdanger,etbutton.x+(etbutton.w/2)-(s1.w),(sbutton.y+sbutton.h)*1.1) 
+        local x,y = etbutton.x+(10*globTweens.jiggle.val), etbutton.y+(10*globTweens.jiggle.val)
+        local w,h = etbutton.w-(20*globTweens.jiggle.val), etbutton.h-(20*globTweens.jiggle.val)
+        lg.setLineWidth(3) lg.setColor(200,50,0) lg.rectangle("line",x,y,w,h) lg.setLineWidth(1) lg.setColor(255,255,255) end)
+    tut.prepare("intro")
+end
+
+game.setupTuts[3] = function (hero,etbutton,sbutton,rbutton,s1,p1,s2,p2)
+    td = tut.td
+    local intro = td.drawBubble(5,s2.w,s2.h,"center","Meet the Mage Hero, another long range Hero. The Mage is also the weakest Hero so keep it protected. In the final game the Mage will have a host of support abilities.",nil,true)
+    local intro2 = td.drawBubble(5,s2.w,s2.h,"center","and... the Beastmaster Hero. The other close range Hero. In the final game, the Beastmaster will be responsible for capturing wild beasts and training them to fight for you.",nil,true)
+    local intro3 = td.drawBubble(5,s1.w,s1.h,"center","Defeat the enemy on this level.",nil,true)
+   
+    tut.addSlide("intro","intro2","Mage Introduction",true,function() 
+        lg.draw(intro,p2.x,p2.y) 
+        td.continueButton(lg.getWidth()-35,lg.getHeight()-35,globTweens.jiggle.val*2)
+        end)
+    tut.addSlide("intro2","intro3","BM Introduction",true,function() 
+        lg.draw(intro2,p2.x,p2.y) 
+        td.continueButton(lg.getWidth()-35,lg.getHeight()-35,globTweens.jiggle.val*2)
+        end)
+    tut.addSlide("intro3",nil,"goal",true,function() 
+        lg.draw(intro3,lg.getWidth()/6,lg.getHeight()/2) 
+        td.continueButton((lg.getWidth()/6)+s1.w,(lg.getHeight()/2)+s1.h,globTweens.jiggle.val*2)
+        end)
   
     tut.prepare("intro")
 end
 
-game.setupTuts[3] = function (hero,button)
+game.setupTuts[4] = function (hero,etbutton,sbutton,rbutton,s1,p1)
     td = tut.td
-    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5*1.1,"center","Meet the Mage Hero, another long range Hero. The Mage is also the weakest Hero so keep it protected. In the final game the Mage will have a host of support abilities.",nil,true)
-    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5*1.1,"center","and... the Beastmaster Hero. The other close range Hero. In the final game, the Beastmaster will be responsible for capturing wild beasts and training them to fight for you.",nil,true)
-    local intro3 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Defeat the enemy on this level.",nil,true)
+    local intro = td.drawBubble(5,s1.w,s1.h,"center","Fights will end if you don't have enough Heroes to kill the enemies.",nil,true)
+    local intro2 = td.drawBubble(5,s1.w,s1.h,"center","From now on it is possible that you can fail.",nil,true)
    
-    tut.addSlide("intro","intro2","Mage Introduction",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4*3) end)
-    tut.addSlide("intro2","intro3","BM Introduction",true,function() lg.draw(intro2,lg.getWidth()/6,lg.getHeight()/6) end)
-    tut.addSlide("intro3",nil,"goal",true,function() lg.draw(intro3,lg.getWidth()/6,lg.getHeight()/2) end)
+    tut.addSlide("intro","intro2","Losing",true,function() 
+        lg.draw(intro,p1.x,p1.y) 
+        td.continueButton(p1.x+s1.w,p1.y+s1.h,globTweens.jiggle.val*2)
+        end)
+    tut.addSlide("intro2",nil,"Losing2",true,function() 
+        lg.draw(intro2,p1.x,p1.y) 
+        td.continueButton(p1.x+s1.w,p1.y+s1.h,globTweens.jiggle.val*2)
+        end)
   
     tut.prepare("intro")
 end
 
-game.setupTuts[4] = function (hero,button)
+game.setupTuts[5] = function (hero,etbutton,sbutton,rbutton,s1,p1)
     td = tut.td
-    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Fights will end if you dont have enough Heroes to kill the enemies.",nil,true)
-    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","From now on it is possible that you can fail.",nil,true)
+    local intro = td.drawBubble(5,s1.w,s1.h,"center","These enemies are very strong. You will need to use three Heroes to defeat them.",nil,true)
+    local intro2 = td.drawBubble(5,s1.w,s1.h*1.2,"center","You will fail if you have less than three Heroes remaining because these enemies require three attacks to damage them.",nil,true)
    
-    tut.addSlide("intro","intro2","Losing",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4*3) end)
-    tut.addSlide("intro2",nil,"Losing2",true,function() lg.draw(intro2,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("intro","intro2","Losing",true,function() 
+        lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4) 
+        td.continueButton((lg.getWidth()/6)+s1.w,(lg.getHeight()/4)+s1.h,globTweens.jiggle.val*2)
+        end)
+    tut.addSlide("intro2",nil,"Losing2",true,function() 
+        lg.draw(intro2,p1.x,p1.y) 
+        td.continueButton(p1.x+s1.w,p1.y+(s1.h*1.2),globTweens.jiggle.val*2)
+        end)
   
     tut.prepare("intro")
 end
 
-game.setupTuts[5] = function (hero,button)
-    td = tut.td
-    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","These enemies are very strong. You will need to use three Heroes to defeat them.",nil,true)
-    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5*1.2,"center","You will fail if you have less than three Heroes remaining because these enemies require three attacks to damage them.",nil,true)
-   
-    tut.addSlide("intro","intro2","Losing",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4) end)
-    tut.addSlide("intro2",nil,"Losing2",true,function() lg.draw(intro2,lg.getWidth()/6,lg.getHeight()/4*3) end)
-  
-    tut.prepare("intro")
-end
-
-game.setupTuts[6] = function (hero,button)
+game.setupTuts[6] = function (hero,etbutton,sbutton,rbutton,s1,p1)
     td = tut.td
     local intro = td.drawBubble(5,lg.getWidth()/2*1.5,lg.getHeight()/2,"center","Levels can be built using the Tiled Editor and imported into this prototype.",nil,true)
     local intro2 = td.drawBubble(5,lg.getWidth()/2*1.5,lg.getHeight()/2,"center","You can also import new tileset graphics to use in your levels. Read the documentation to find out how.",nil,true)
    
-    tut.addSlide("intro","intro2","LevelEditing",true,function() lg.draw(intro,10,lg.getHeight()/2-10) end)
-    tut.addSlide("intro2",nil,"TilesetImport",true,function() lg.draw(intro2,10,10) end)
+    tut.addSlide("intro","intro2","LevelEditing",true,function() 
+        lg.draw(intro,10,lg.getHeight()/2-10)
+        td.continueButton(10+(lg.getWidth()/2*1.5),(lg.getHeight()/2-10)+(lg.getHeight()/2),globTweens.jiggle.val*2)
+        end)
+    tut.addSlide("intro2",nil,"TilesetImport",true,function() 
+        lg.draw(intro2,10,10) 
+        td.continueButton(10+(lg.getWidth()/2*1.5),10+(lg.getHeight()/2),globTweens.jiggle.val*2)
+        end)
   
     tut.prepare("intro")
 end
 
-game.setupTuts[7] = function (hero,button)
+game.setupTuts[7] = function (hero,etbutton,sbutton,rbutton,s1,p1)
     td = tut.td
-    local intro = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","From now on the game will play in Endless Mode. New fights will be randomly generated.. FOREVER",nil,true)
-    local intro2 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Have your say on development at www.broadstories.com",nil,true)
-    local intro3 = td.drawBubble(5,lg.getWidth()/3*2,lg.getHeight()/5,"center","Happy Hunting and thanks for playing!",nil,true)
+    local intro = td.drawBubble(5,s1.w,s1.h,"center","From now on the game will play in Endless Mode. New fights will be randomly generated.. FOREVER",nil,true)
+    local intro2 = td.drawBubble(5,s1.w,s1.h,"center","Have your say on development at www.broadstories.com",nil,true)
+    local intro3 = td.drawBubble(5,s1.w,s1.h,"center","Happy Hunting and thanks for playing!",nil,true)
    
-    tut.addSlide("intro","intro2","LevelEditing",true,function() lg.draw(intro,lg.getWidth()/6,lg.getHeight()/4*3) end)
-    tut.addSlide("intro2","intro3","TilesetImport",true,function() lg.draw(intro2,lg.getWidth()/6,lg.getHeight()/4*3) end)
-    tut.addSlide("intro3",nil,"TilesetImport",true,function() lg.draw(intro3,lg.getWidth()/6,lg.getHeight()/4*3) end)
+    tut.addSlide("intro","intro2","LevelEditing",true,function() lg.draw(intro,p1.x,p1.y) td.continueButton(p1.x+s1.w,p1.y+s1.h,globTweens.jiggle.val*2) end)
+    tut.addSlide("intro2","intro3","TilesetImport",true,function() lg.draw(intro2,p1.x,p1.y) td.continueButton(p1.x+s1.w,p1.y+s1.h,globTweens.jiggle.val*2) end)
+    tut.addSlide("intro3",nil,"TilesetImport",true,function() lg.draw(intro3,p1.x,p1.y) td.continueButton(p1.x+s1.w,p1.y+s1.h,globTweens.jiggle.val*2) end)
   
     tut.prepare("intro")
 end
@@ -243,11 +320,12 @@ function game:mousepressed(x,y,button)
     tut.complete("intro3")
     tut.complete("intro2")
     tut.complete("intro")
+    self.interacted = true
 end
 
 function game:touchreleased(id,x,y,pressure)
     local mx,my = lg.getWidth()*x,lg.getHeight()*y
-    if inputAccepted then
+    if inputAccepted and self.touched then
         if not self.ui:click(mx,my) then
             local tile = grid.findTileAtCoord(self.map,mx,my)
             if tile and self.collected then
@@ -268,6 +346,7 @@ function game:touchreleased(id,x,y,pressure)
                 tut.complete("deselect")
             end
         end
+        self.touched = false
     end
     
 end
@@ -278,20 +357,24 @@ function game:touchpressed(id,x,y,pressure)
     tut.complete("intro3")
     tut.complete("intro2")
     tut.complete("intro")
+    self.touched = true
 end
 
 function game:touchmoved(id,x,y,pressure)
     x,y = lg.getWidth()*x,lg.getHeight()*y
     self.lastTouch = {x=x,y=y}
+    
 end
 
 function game:mousereleased(x,y,button)
-
+    if self.interacted then
+        self.interacted = false
+    end
 end
 
 function game:keypressed(key)
     if inputAccepted then
-        if key == "escape" then love.event.quit() 
+        if key == "escape" or key =="back" then loadMenu()
         elseif key == " " then self:startNextPhase()
         elseif key == "r" and DEBUG_MODE then self:triggerVictory() 
         elseif key == "k" and DEBUG_MODE then pimp.killTeam(self.control,2) 

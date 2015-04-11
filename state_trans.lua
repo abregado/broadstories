@@ -1,8 +1,8 @@
 local aa = require('attackAnim')
 local lg = require('love.graphics')
 
-local flyupFont = lg.newFont("/assets/ccaps.ttf",40)
-local underbarFont = lg.newFont("/assets/ccaps.ttf",20)
+local flyupFont = lg.newFont('/assets/Quattrocento-Regular.ttf',40)
+local underbarFont = lg.newFont('/assets/Quattrocento-Regular.ttf',20)
 local barColor = {255,255,255}
 local fontColor = {0,0,0}
 
@@ -20,6 +20,8 @@ function trans.new(animations)
     state.mousepressed = trans.mousepressed
     state.enter = trans.enter
     state.addToRegister = trans.addToRegister
+    state.skip = trans.skip
+    state.touchreleased = trans.skip
     
     for i,v in ipairs(animations) do
         state:addToRegister(v)
@@ -56,7 +58,15 @@ function trans:update(dt)
     end
 end
 
-function trans:keypressed()
+function trans:keypressed(key)
+    if key == "escape" then buildNextLevel() end
+
+    if self.animRegister[1] then
+        table.remove(self.animRegister,1)
+    end
+end
+
+function trans:skip()
     if self.animRegister[1] then
         table.remove(self.animRegister,1)
     end

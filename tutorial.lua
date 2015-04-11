@@ -182,6 +182,22 @@ function t.td.arrowIndicator(x,y,h,w,bounce,up)
     lg.polygon("fill",verts)
 end
 
+function t.td.continueButton(x,y,scaleIn)
+    local scale = scaleIn or 1
+    local bgr = 15 * scale
+    local bor = bgr-5
+    local ass = bor/2
+    lg.setColor(colors.bg)
+    lg.circle("fill",x,y,bgr,20)
+    lg.setColor(colors.border)
+    lg.setLineWidth(3)
+    lg.circle("line",x,y,bgr,20)
+    lg.setLineWidth(1)
+    local x1,y1 = x-(ass*.75),y-ass
+    local x2,y2 = x-(ass*.75),y+ass
+    local x3,y3 = x+(ass*1.5),y
+    lg.polygon("fill",x1,y1,x2,y2,x3,y3)
+end
 
 
 
@@ -201,9 +217,9 @@ end
 
 --creates a canvas with a rounded rectangle rendered to it
 function t.td.roundedRectangle(r,w,h,side,border)
-    w = math.pow(2, math.ceil(math.log(w)/math.log(2))-1);
-    h = math.pow(2, math.ceil(math.log(h)/math.log(2))-1);
-    local bubble = lg.newCanvas(w,h)
+    cw = math.pow(2, math.ceil(math.log(w)/math.log(2)));
+    ch = math.pow(2, math.ceil(math.log(h)/math.log(2)));
+    local bubble = lg.newCanvas(cw,ch)
     lg.setColor(255,255,255)
 
     local s = {}
@@ -312,9 +328,9 @@ end
 --r,tw,th (pixels), side ("left","right","center"), text (string), face (image), border (bool)
 -- if not face given, bubble will be larger
 function t.td.drawBubble(r,tw,th,side,text,face,border)
-    tw = math.pow(2, math.ceil(math.log(tw)/math.log(2))-1);
-    th = math.pow(2, math.ceil(math.log(th)/math.log(2))-1);
-    local bubble = lg.newCanvas(tw,th)
+    cw = math.pow(2, math.ceil(math.log(tw)/math.log(2)));
+    ch = math.pow(2, math.ceil(math.log(th)/math.log(2)));
+    local bubble = lg.newCanvas(cw,ch)
     lg.setColor(255,255,255)
     
     local h = th*0.6
@@ -391,6 +407,7 @@ function t.td.drawBubble(r,tw,th,side,text,face,border)
     lg.setCanvas()
     return bubble
 end
+
 
 function t.td.centreText(text,x,y,w,h,align)
     local font = lg.getFont()

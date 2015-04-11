@@ -194,8 +194,18 @@ function d.draw(self,x,y,showStats,arrow)
     end
     
     if arrow then
+        local ass = self.map.ts/4
+        local ax,ay = px,py-(ass*2.5*globTweens.jiggle.val)
         lg.setColor(255,0,0)
-        lg.circle("fill",px,py-(self.map.ts/2)-(self.map.ts*globTweens.jiggle.val),self.map.ts/4,5)
+        
+        local x1,y1 = ax-ass,ay-(ass*1.5)
+        local x2,y2 = ax+ass,ay-(ass*1.5)
+        local x3,y3 = ax-(ass/2),ay-(ass*3)
+        local rw,rh = ass,ass*2
+        lg.polygon("fill",x1,y1,x2,y2,ax,ay)
+        lg.rectangle("fill",x3,y3,rw,rh)
+        
+        --lg.circle("fill",px,py-(self.map.ts/2)-(self.map.ts*globTweens.jiggle.val),self.map.ts/4,5)
     end
 
 end

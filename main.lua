@@ -82,6 +82,9 @@ img.disk = lg.newImage('/assets/load.png')
 img.binary = lg.newImage('/assets/bgsplashlogo.png')
 img.dragon = lg.newImage('/assets/bs-invert-dragon-small.png')
 img.broadstories = lg.newImage('/assets/bs-invert-small.png')
+img.facebook = lg.newImage('/assets/facebook.png')
+img.twitter = lg.newImage('/assets/twitter.png')
+img.bglogo = lg.newImage('/assets/bglogo-bw.png')
 
 
 levels = {}

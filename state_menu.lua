@@ -1,5 +1,6 @@
 local mbut = require('/ui/mixButton')
 local pbut = require('/ui/panelButton')
+local ibut = require('/ui/iconButton')
 local lg = require('love.graphics')
 local tween = require('tween')
 local reg = require('animRegister')
@@ -14,7 +15,7 @@ function trans.new()
     
     state.ui = uicon.new(state,font)
     state.from = nil
-    
+    state.interacted = false
     local mainbut = {x=lg.getWidth()/5,y=lg.getHeight()/20,w=lg.getWidth()*.6,h=lg.getHeight()*.5}
     
     local remainH = lg.getHeight()-mainbut.y-mainbut.h
@@ -34,11 +35,16 @@ function trans.new()
     but15.click = function() trans.loadMods(state) end
     but15.active = false
     local but2 = mbut.new(bc1.x,br1.y,state.ui,img.teleport,"Visit Broadstories",true,bw,bh,true)
-    but2.ready = false
-    local but3 = mbut.new(bc1.x,br2.y,state.ui,img.build,"Get Prototypes",true,bw,bh,true)
-    but3.ready = false
+    but2.click = function() love.system.openURL('http://www.broadstories.com/') end
+    local but3 = mbut.new(bc1.x,br2.y,state.ui,img.bglogo,"Get Prototypes",true,bw,bh,true)
+    but3.click = function() love.system.openURL('http://prototype.binarygambit.com/') end
     local but4 = mbut.new(bc2.x,br2.y,state.ui,img.retreat,"Quit",true,bw,bh,true)
     but4.click = function() trans.quit(state) end
+    
+    local but5 = ibut.new(lg.getWidth()-80,0,state.ui,img.facebook,true,80,48)
+    local but6 = ibut.new(lg.getWidth()-80,56,state.ui,img.twitter,true,80,48)
+    but5.click = function() love.system.openURL('http://www.facebook.com/Broadstories') end
+    but6.click = function() love.system.openURL('http://twitter.com/gladers') end
     
     state.ui:addElement(but)
     state.ui:addElement(but1)
@@ -46,6 +52,8 @@ function trans.new()
     state.ui:addElement(but2)
     state.ui:addElement(but3)
     state.ui:addElement(but4)
+    state.ui:addElement(but5)
+    state.ui:addElement(but6)
     
     state.animReg = reg.new(false)
     
@@ -56,6 +64,7 @@ function trans.new()
     state.update = trans.update
     state.enter = trans.enter
     state.mousereleased = trans.mousereleased
+    state.mousepressed = trans.mousepressed
     state.keypressed = trans.keypressed
     
     
@@ -93,7 +102,10 @@ function trans.quit(self)
 end
 
 function trans.play(self)
-    levelProg = levelProg + 1
+    if levelProg == 0 then
+        levelProg = 1
+    end
+    
     buildNextLevel()
 end
 
@@ -108,15 +120,23 @@ function trans:update(dt)
     self.animReg:update(dt)
 end
 
-function trans:keypressed()
+function trans:keypressed(key)
     self.animReg:keypressed()
+    if key == "escape" then love.event.quit() end
 end
 
 function trans:mousereleased(x,y,button)
-    if button == 'l' then
-        self.ui:click(x,y)
+    if self.interacted then
+        if button == 'l' then
+            self.ui:click(x,y)
+        end
+        self.animReg:mousepressed()
     end
-    self.animReg:mousepressed()
+    self.interacted = false
+end
+
+function trans:mousepressed()
+    self.interacted = true
 end
 
 function trans:enter(from)
